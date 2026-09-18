@@ -1,7 +1,8 @@
-# Dinamo Road to Goal 3D — First-Person Stand Game
+# Dinamo Road to Goal 3D — Third-Person Stand Game
 
-A first-person 3D remake of the 2D stand game (`dinamo-matchday`). Same story and rules, now walked
-in first person with real 3D graphics. One device, one player at a time, about 3 minutes per run.
+A third-person 3D remake of the 2D stand game (`dinamo-matchday`), and its replacement at the stand.
+Same story and rules, now played as your own Dinamo player seen from behind, GTA-style, with real 3D
+graphics. One laptop with mouse and keyboard, one player at a time, about 3 minutes per run.
 
 ## Tech
 - Three.js + Vite + plain JavaScript (no TypeScript, no framework, no backend)
@@ -11,8 +12,8 @@ in first person with real 3D graphics. One device, one player at a time, about 3
 
 ## Game flow
 1. **Registration** – username, mobile number, e-mail. The run timer starts on Start.
-2. **Dressing room (first person)** – find your shirt and boots, then the tape in the physio room,
-   then the coach at the tunnel mouth. Mouse looks, WASD walks.
+2. **Dressing room (third person)** – find your shirt and boots, then the tape in the physio room,
+   then the coach at the tunnel mouth. Mouse orbits the camera, WASD walks relative to it.
 3. **Question 1 (easy)** – the coach asks. Correct → substituted in. Wrong → game over.
 4. **Tunnel walk (automatic)** – walk out into the stadium, substitution board, receive the ball.
 5. **Defender 1** – Question 2 (medium). Correct → go past. Wrong → tackled → game over.
@@ -25,11 +26,14 @@ in first person with real 3D graphics. One device, one player at a time, about 3
 - Countdown per question: 20s, 15s, 12s, 10s. Timeout = wrong.
 - Georgian (default) and English.
 - Save every attempt: `{ name, phone, email, timeMs, stageReached, scored, date }`
-- Ranking: `scored === true`, fastest `timeMs` first. Admin export and reset.
+- Ranking: `scored === true`, fastest `timeMs` first. Admin export (Ctrl+Shift+E) and reset
+  (Ctrl+Shift+X) on the result screen.
 
 ## Assets
-- All models, textures and sounds come from files in `public/assets/`, never generated in code.
-- Placeholder geometry is fine until real assets exist, but it must load through the same code path.
+- All models, textures and sounds come from files in `public/assets/` (free CC0 packs and the 2D
+  game's sounds), never generated in code.
+- The only exception: blockout shapes built in code as placeholders until real assets exist. They
+  must load through the same code path so swapping them in changes no game code.
 
 ## Workflow rules (always follow)
 - The plan and roadmap live in `docs/SPEC.md`. Read it before starting any feature.
