@@ -32,8 +32,13 @@ graphics. One laptop with mouse and keyboard, one player at a time, about 3 minu
 ## Assets
 - All models, textures and sounds come from files in `public/assets/` (free CC0 packs and the 2D
   game's sounds), never generated in code.
-- The only exception: blockout shapes built in code as placeholders until real assets exist. They
-  must load through the same code path so swapping them in changes no game code.
+- Two exceptions:
+  - Blockout shapes built in code as placeholders until real assets exist. They must load through
+    the same code path so swapping them in changes no game code.
+  - The stadium bowl (`src/world/stadium.js`), built from the Dinamo Arena's real dimensions because
+    no model of it exists. Its surfaces still take their look from texture files.
+- The player is a real footballer in the Dinamo kit, and the stadium must look like Dinamo
+  Tbilisi's Boris Paichadze Dinamo Arena (see `docs/SPEC.md` §10).
 
 ## Workflow rules (always follow)
 - The plan and roadmap live in `docs/SPEC.md`. Read it before starting any feature.
