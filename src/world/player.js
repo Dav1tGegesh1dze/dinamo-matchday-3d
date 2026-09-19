@@ -19,10 +19,10 @@ function axis(positive, negative) {
   return (positive.some((code) => keys.has(code)) ? 1 : 0) - (negative.some((code) => keys.has(code)) ? 1 : 0);
 }
 
-// The player: a footballer in the Dinamo kit who jogs relative to the camera, turns to face where
+// The player: a footballer, in training clothes until he picks up his kit, who jogs relative to the camera, turns to face where
 // he goes, slides along walls (as a capsule) and stays on the floor.
 export async function createPlayer(scene, { floors, walls }, spawn) {
-  const character = await createCharacter('footballer', KITS.dinamo);
+  const character = await createCharacter('footballer', KITS.training);
   const model = character.object;
   model.position.copy(spawn);
   model.rotation.y = Math.PI;
@@ -38,6 +38,7 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
 
   return {
     model,
+    wear: character.wear,
 
     update(dt, yaw) {
       const forward = axis(['KeyW', 'ArrowUp'], ['KeyS', 'ArrowDown']);

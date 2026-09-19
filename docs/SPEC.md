@@ -477,8 +477,8 @@ bench (its shoes, split into their own `Shoes` material offline), and Poly Haven
 the physio bed. Picking up the shirt dresses him in the blue shirt and shorts, the boots swap the
 trainers for black boots, and the tape shows as white tape round his ankles.
 
-- [ ] He starts in training clothes and each pickup visibly changes what he wears
-- [ ] The shirt, boots and tape look like the real things, not blocks
+- [x] He starts in training clothes and each pickup visibly changes what he wears
+- [x] The shirt, boots and tape look like the real things, not blocks
 
 ### 12. `feature/real-dressing-room` — a club dressing room
 

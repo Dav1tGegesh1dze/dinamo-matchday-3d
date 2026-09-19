@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { buildLevel, layoutFromGrid } from '../world/level.js';
 import { createPlayer } from '../world/player.js';
 import { createFollowCamera } from '../world/camera.js';
-import { createCharacter } from '../world/character.js';
+import { createCharacter, kitPiece, KITS } from '../world/character.js';
 import { loadModel } from '../world/loader.js';
 import { updateInteractions } from '../world/interact.js';
 import { showKit, lightKit, flash } from '../ui/hud.js';
@@ -41,9 +41,14 @@ const MAP = [
 ];
 const TILE = 1.25;
 const WALL_HEIGHT = 3;
-const KIT = { shirt: 's', boots: 'b', tape: 't' }; // item → map letter
-const ITEM_HEIGHT = 0.9; // kit items float at hand height and turn slowly, so they catch the eye
-const ITEM_SPIN = 1.5; // radians per second
+// The kit to find: where it is on the map, how it looks lying there, and what picking it up changes
+// on the player. The shirt and boots are the footballer model's own shirt and shoes.
+const KIT = {
+  shirt: { letter: 's', look: () => kitPiece('Shirt', KITS.dinamo.Shirt), wear: { Shirt: KITS.dinamo.Shirt, Pants: KITS.dinamo.Pants } },
+  boots: { letter: 'b', look: () => kitPiece('Shoes', KITS.dinamo.Shoes), wear: { Shoes: KITS.dinamo.Shoes } },
+  tape: { letter: 't', look: async () => (await loadModel('tape')).scene, wear: { Socks: KITS.dinamo.Socks } },
+};
+const GLOW = { strength: 0.6, speed: 3 }; // kit still to find pulses brighter in its own colour, to catch the eye
 const COACH_SIZE = 0.6; // the coach blocks the player like a 0.6 m wall box
 const MUSIC_VOLUME = 0.7;
 const CROWD = { volume: 1, near: 3 }; // the crowd through the tunnel mouth, loud only near the coach
@@ -63,12 +68,13 @@ export const dressingRoom = {
     this.follow.update(0);
 
     this.held = new Set();
+    this.time = 0;
     this.items = [];
     this.things = [];
     showKit(Object.keys(KIT));
-    for (const [name, letter] of Object.entries(KIT)) {
-      const { scene: item } = await loadModel(name);
-      item.position.copy(layout.spots[letter]).setY(ITEM_HEIGHT);
+    for (const [name, { letter, look, wear }] of Object.entries(KIT)) {
+      const item = await look();
+      item.position.copy(layout.spots[letter]);
       this.scene.add(item);
       this.items.push(item);
       const thing = {
@@ -79,6 +85,7 @@ export const dressingRoom = {
           this.items.splice(this.items.indexOf(item), 1);
           this.things.splice(this.things.indexOf(thing), 1);
           this.held.add(name);
+          this.player.wear(wear);
           lightKit(name);
           play('pickup');
         },
@@ -120,10 +127,14 @@ export const dressingRoom = {
   },
 
   update(dt) {
+    this.time += dt;
     this.player.update(dt, this.follow.yaw);
     this.follow.update(dt);
     this.coach.update(dt);
-    for (const item of this.items) item.rotation.y += ITEM_SPIN * dt;
+    const glow = GLOW.strength * (0.5 + 0.5 * Math.sin(this.time * GLOW.speed));
+    for (const item of this.items) {
+      item.traverse((node) => node.isMesh && node.material.emissive.copy(node.material.color).multiplyScalar(glow));
+    }
     updateInteractions(this.player.model, this.things);
   },
 };
