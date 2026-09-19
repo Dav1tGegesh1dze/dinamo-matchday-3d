@@ -38,13 +38,25 @@ export async function createCharacter(name, kit) {
       paint(scene, colours);
     },
 
-    play(clip, timeScale = 1) {
+    // Cross-fades to `clip`. `once` plays it a single time and holds the last frame (a fall, a dive).
+    play(clip, timeScale = 1, once = false) {
       const next = actions[clip];
       next.timeScale = timeScale;
       if (next === current) return;
-      next.reset().play();
+      next.reset();
+      next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+      next.clampWhenFinished = once;
+      next.play();
       if (current) next.crossFadeFrom(current, FADE_SECONDS, false);
       current = next;
+    },
+
+    // Holds one frame of `clip`, `at` seconds in (the Sitting pose, tipped back, is a sliding tackle).
+    // It shows at once, with no cross-fade, so it also reads in a frozen moment.
+    pose(clip, at) {
+      this.play(clip, 0);
+      actions[clip].time = at;
+      mixer.update(FADE_SECONDS);
     },
 
     // Idle when still, otherwise Walk or Run played at the speed that matches `speed` (m/s).
