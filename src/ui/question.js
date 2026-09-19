@@ -36,6 +36,9 @@ export function askQuestion(stage) {
   const endsAt = performance.now() + limit * 1000;
   return new Promise((resolve) => {
     const answer = (button) => {
+      // A click on an answer is the one moment the browser lets the game take the mouse back, so
+      // play carries on without another "Click to play". A timeout still needs that click.
+      if (button) document.querySelector('canvas').requestPointerLock();
       clearInterval(ticker);
       buttons.forEach((b) => (b.disabled = true));
       const right = buttons.find((b) => Number(b.dataset.index) === entry.correct);

@@ -11,6 +11,7 @@ const WALL_GAP = 0.2; // how far the camera stays in front of a wall
 const MIN_HEIGHT = 0.3; // above the feet, so looking up never puts the camera under the floor
 const FOLLOW_RATE = 15;
 const EASE_OUT_RATE = 5;
+const DRIFT_RATE = 1.2; // how fast driftBehind swings the camera round
 const HIDE_DISTANCE = 0.9; // closer than this, the player model is hidden so it doesn't fill the view
 
 // Third-person follow camera. The mouse orbits it around the player (yaw around, pitch up and down).
@@ -32,6 +33,13 @@ export function createFollowCamera({ walls }, subject) {
     camera,
     yaw: 0,
     pitch: START_PITCH,
+
+    // For scripted scenes: swings the camera back behind the subject a little each frame, so it
+    // follows the action when the mouse is left alone.
+    driftBehind(dt) {
+      const behind = subject.rotation.y + Math.PI - rig.yaw;
+      rig.yaw += Math.atan2(Math.sin(behind), Math.cos(behind)) * Math.min(1, DRIFT_RATE * dt);
+    },
 
     update(dt) {
       const feet = subject.position;

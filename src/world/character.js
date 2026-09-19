@@ -5,6 +5,8 @@ import { loadModel } from './loader.js';
 export const KITS = {
   dinamo: { Shirt: 0x1450a0, Pants: 0x0f3f86, Socks: 0xffffff },
   official: { Shirt: 0x151515, Pants: 0x151515, Socks: 0x151515 },
+  rival: { Shirt: 0xc8102e, Pants: 0xc8102e, Socks: 0xffffff },
+  keeper: { Shirt: 0x1f9e4a, Pants: 0x151515, Socks: 0x1f9e4a },
 };
 
 const FADE_SECONDS = 0.25;

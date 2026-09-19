@@ -5,10 +5,13 @@ import { createFollowCamera } from '../world/camera.js';
 import { loadModel } from '../world/loader.js';
 import { showKit, showPrompt, showBoard, hideBoard } from '../ui/hud.js';
 import { run } from '../lib/run.js';
+import { rollBall, BALL_RADIUS } from '../world/ball.js';
+import { pitch, addOpponents } from './pitch.js';
 
 // The walk out, played by itself: from inside the tunnel, out past the fourth official holding up
 // the substitution board, to the centre circle, where a team-mate's pass arrives at the player's
-// feet from a team-mate. The mouse still orbits the camera; the camera drifts back behind the player when left alone.
+// feet from a team-mate. The mouse still orbits the camera; the camera drifts back behind the
+// player when left alone. The opponents are already in place; the pitch stage takes over from here.
 const START = new THREE.Vector3(0, 0, 64);
 const LEGS = [
   { to: [0, 52], speed: 1.3 }, // walk out of the tunnel
@@ -22,15 +25,14 @@ const BOARD_RANGE = 8; // metres; the board's name shows when the player is this
 const ATTACK = [1, 0]; // the player attacks the goal at +x
 const PASS = { from: new THREE.Vector3(-16, 0.11, -14), seconds: 1.6 };
 const TEAMMATE = new THREE.Vector3(-16.6, 0, -14.4); // stands just behind the ball he passes
-const BALL_RADIUS = 0.11;
 const TURN_RATE = 8;
-const CAMERA_DRIFT = 1.2; // how fast the camera swings back behind the player
 
 export const tunnel = {
   scene: new THREE.Scene(),
   camera: null,
 
-  async enter() {
+  async enter(go) {
+    this.go = go;
     showKit([]);
     showPrompt(null);
     const { walls } = buildStadium(this.scene);
@@ -64,6 +66,8 @@ export const tunnel = {
     this.teammate.moveAt(0);
     this.scene.add(this.teammate.object);
 
+    this.opponents = await addOpponents(this.scene);
+
     ({ scene: this.ball } = await loadModel('ball'));
     this.ball.position.copy(PASS.from);
     this.scene.add(this.ball);
@@ -74,6 +78,7 @@ export const tunnel = {
     this.leg = 0;
     this.waited = 0;
     this.passTime = 0;
+    this.handedOver = false;
     this.screen = new THREE.Vector3();
   },
 
@@ -98,8 +103,7 @@ export const tunnel = {
       this.receivePass(dt);
     }
 
-    const behind = model.rotation.y + Math.PI - this.follow.yaw;
-    this.follow.yaw += Math.atan2(Math.sin(behind), Math.cos(behind)) * Math.min(1, CAMERA_DRIFT * dt);
+    this.follow.driftBehind(dt);
     this.player.update(dt);
     this.official.update(dt);
     this.teammate.update(dt);
@@ -108,19 +112,18 @@ export const tunnel = {
   },
 
   // The ball rolls from a team-mate to just in front of the player, who turns to face the goal.
+  // Once it has arrived, the pitch stage takes over.
   receivePass(dt) {
     const model = this.player.object;
     this.player.moveAt(0);
     turnTowards(model, ...ATTACK, TURN_RATE * dt);
-    if (this.passTime >= PASS.seconds) return;
     this.passTime = Math.min(PASS.seconds, this.passTime + dt);
     const feet = new THREE.Vector3(model.position.x + ATTACK[0] * 0.5, BALL_RADIUS, model.position.z + ATTACK[1] * 0.5);
-    const before = this.ball.position.clone();
     const eased = 1 - (1 - this.passTime / PASS.seconds) ** 2; // slows down as it arrives
-    this.ball.position.lerpVectors(PASS.from, feet, eased);
-    const moved = this.ball.position.clone().sub(before);
-    if (moved.lengthSq() > 0) {
-      this.ball.rotateOnWorldAxis(new THREE.Vector3(moved.z, 0, -moved.x).normalize(), moved.length() / BALL_RADIUS);
+    rollBall(this.ball, new THREE.Vector3().lerpVectors(PASS.from, feet, eased));
+    if (this.passTime === PASS.seconds && !this.handedOver) {
+      this.handedOver = true;
+      this.go(pitch);
     }
   },
 

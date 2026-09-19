@@ -406,7 +406,12 @@ it drifts back behind the player. The ball and goals are blockout placeholders i
 ### 7. `feature/pitch` — beat the defenders and the keeper
 
 The three opponents with questions 2–4, ending in GOAL, tackled or saved. Countdowns 15 s, 12 s,
-10 s.
+10 s. The player dribbles automatically (3 m/s, ball rolling ahead) up to 3.5 m from each
+defender and to the penalty spot for the keeper. Right: he goes round the defender, or shoots into
+the top corner while the keeper dives the other way. Wrong or timeout: the defender runs in and
+pokes the ball away, or the keeper catches it. Clicking an answer re-locks the mouse (the browser
+allows it during a click), so play continues without another "Click to play"; after a timeout the
+player clicks once. The pitch stage shares the scene the tunnel stage built.
 
 - [ ] Beating an opponent moves you to the next; a wrong answer or timeout ends the run
 - [ ] A correct 4th answer scores and stops the timer
