@@ -366,7 +366,9 @@ follows. Shortest route spawn → shirt → boots → tape → coach: 131 m, 42 
 ### 4. `feature/interaction` — pick up your kit
 
 Proximity prompts, E to pick up. Shirt and boots in the dressing room, tape in the physio room. HUD
-icons light up. The coach refuses until all three are held.
+icons light up (the 2D game's `shirt.png`, `boots.png`, `tape.png`). The coach refuses until all
+three are held. The coach is already the Animated Men Pack's suited man (`coach.glb`), since he
+costs no more than a capsule; the kit items are blockout placeholders in `loader.js`.
 
 - [ ] Standing within 2 m of an item and facing it shows a prompt naming it
 - [ ] E picks it up, the item disappears, and its HUD icon lights up
@@ -422,10 +424,10 @@ as positional audio at the tunnel mouth, and the dressing-room music loop.
 
 ### 10. `feature/characters` — real people for everyone else
 
-The coach, defenders and keeper from §9 replace their capsules. Kick, tackle and dive clips from a
+The defenders and keeper from §9 replace their capsules (the coach arrived in item 4). Kick, tackle and dive clips from a
 CC0 animation library.
 
-- [ ] The coach, defenders and keeper are people, not capsules, and they animate
+- [ ] The defenders and keeper are people, not capsules, and they animate
 - [ ] The player kicks on the goal; defenders tackle; the keeper dives
 - [ ] Still 60 fps with four characters on screen
 

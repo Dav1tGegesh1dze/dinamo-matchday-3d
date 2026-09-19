@@ -18,3 +18,5 @@ npm run dev
 All CC0 (public domain), no attribution required, listed for reference:
 
 - `public/assets/models/footballer.glb`: Quaternius, *Animated Men Pack*, via [poly.pizza](https://poly.pizza/m/HMnuH5geEG)
+- `public/assets/models/coach.glb`: Quaternius, *Animated Men Pack*, via [poly.pizza](https://poly.pizza/m/mQnGoME1ez)
+- `public/assets/icons/*.png`: from the 2D game `dinamo-matchday`

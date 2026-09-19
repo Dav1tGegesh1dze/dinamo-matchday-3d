@@ -12,10 +12,22 @@
         position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
         background: rgba(0, 0, 0, 0.55); color: #fff; font: bold 40px sans-serif; cursor: pointer;
       }
-      #overlay[hidden] { display: none; }
+      #kit { position: fixed; top: 16px; left: 16px; display: flex; gap: 10px; }
+      #kit img { width: 48px; height: 48px; image-rendering: pixelated; opacity: 0.25; filter: grayscale(1); }
+      #kit img.held { opacity: 1; filter: none; }
+      #prompt, #message {
+        position: fixed; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 8px;
+        color: #fff; font: bold 26px sans-serif; white-space: nowrap;
+      }
+      #prompt { bottom: 60px; background: rgba(0, 0, 0, 0.6); }
+      #message { top: 30%; background: #e30613; }
+      [hidden] { display: none !important; }
     </style>
   </head>
   <body>
+    <div id="kit"></div>
+    <div id="prompt" hidden></div>
+    <div id="message" hidden></div>
     <div id="overlay"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
