@@ -488,10 +488,10 @@ with a Dinamo shirt in each and a bench in front, a tactics chalkboard and a cra
 physio room a treatment bed; the showers wall tiles and a wet-floor sign; bins and shelves in the
 corridors. Collision boxes cover the furniture.
 
-- [ ] No grey blockout boxes remain in the dressing-room stage
-- [ ] Every room is recognisable (dressing room, physio, showers, corridor, tunnel mouth)
-- [ ] Collision matches the furniture, nobody gets stuck, the camera stays under the ceiling
-- [ ] Still 60 fps
+- [x] No grey blockout boxes remain in the dressing-room stage
+- [x] Every room is recognisable (dressing room, physio, showers, corridor, tunnel mouth)
+- [x] Collision matches the furniture, nobody gets stuck, the camera stays under the ceiling
+- [x] Still 60 fps
 
 ### 13. `feature/real-tunnel` — the players' tunnel
 

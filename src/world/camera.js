@@ -24,8 +24,8 @@ document.addEventListener('mousemove', (event) => {
 
 // Third-person follow camera. The mouse orbits it around the player (yaw around, pitch up and down).
 // Raycasts against the wall boxes pull it in front of any wall between the player's head and where
-// it wants to be; it eases back out when the space opens up.
-export function createFollowCamera({ walls }, subject) {
+// it wants to be; it eases back out when the space opens up. Indoors it also stays under the ceiling.
+export function createFollowCamera({ walls, ceiling = Infinity }, subject) {
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
   const head = new THREE.Vector3();
   const target = new THREE.Vector3();
@@ -68,7 +68,7 @@ export function createFollowCamera({ walls }, subject) {
       distance = allowed < distance ? allowed : distance + (allowed - distance) * (1 - Math.exp(-EASE_OUT_RATE * dt));
 
       camera.position.copy(aim).addScaledVector(back, distance);
-      camera.position.y = Math.max(camera.position.y, feet.y + MIN_HEIGHT);
+      camera.position.y = THREE.MathUtils.clamp(camera.position.y, feet.y + MIN_HEIGHT, ceiling - WALL_GAP);
       camera.lookAt(aim);
       subject.visible = distance > HIDE_DISTANCE;
     },

@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { loadTexture as texture } from './loader.js';
+import { worldUvs } from './level.js';
 
 // The Boris Paichadze Dinamo Arena, built from its real proportions (see docs/SPEC.md §10): an oval
 // two-tier bowl with a walkway ring between the tiers, a ring roof over the upper tier carried by
@@ -15,16 +17,6 @@ const FLOODLIGHTS = 120;
 const GRASS_TILE = 4; // metres covered by one repeat of the grass texture
 const SEAT_TILE = { along: 8, up: 6.4 }; // one seats.png tile is 16 seats × 8 rows
 const BOARD = { height: 0.9, length: 14.4, gap: 4 }; // boards.png is 16:1; a gap in front of the tunnel
-
-const textures = new THREE.TextureLoader();
-
-function texture(name, anisotropy = 8) {
-  const map = textures.load(`assets/textures/${name}`);
-  map.colorSpace = THREE.SRGBColorSpace;
-  map.wrapS = map.wrapT = THREE.RepeatWrapping;
-  map.anisotropy = anisotropy;
-  return map;
-}
 
 export function buildStadium(scene) {
   const grass = texture('grass.jpg');
@@ -80,13 +72,6 @@ function paint(geometry, shade) {
     for (let k = 0; k < 3; k++) colors.push(value, value, value);
   }
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-}
-
-function worldUvs(geometry, tile) {
-  const position = geometry.attributes.position;
-  const uvs = [];
-  for (let i = 0; i < position.count; i++) uvs.push(position.getX(i) / tile, position.getZ(i) / tile);
-  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 }
 
 // Regulation markings: touchlines, goal lines, halfway line, centre circle, penalty and goal areas,

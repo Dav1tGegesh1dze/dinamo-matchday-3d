@@ -32,12 +32,22 @@ const PLACEHOLDERS = {
 };
 const gltfLoader = new GLTFLoader();
 const cache = new Map();
+const textureLoader = new THREE.TextureLoader();
 
 export async function loadModel(name) {
   if (PLACEHOLDERS[name]) return { scene: PLACEHOLDERS[name](), animations: [] };
   if (!cache.has(name)) cache.set(name, gltfLoader.loadAsync(`assets/models/${name}.glb`));
   const gltf = await cache.get(name);
   return { scene: clone(gltf.scene), animations: gltf.animations };
+}
+
+// A repeating colour texture from public/assets/textures/<name>.
+export function loadTexture(name, anisotropy = 8) {
+  const map = textureLoader.load(`assets/textures/${name}`);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.wrapS = map.wrapT = THREE.RepeatWrapping;
+  map.anisotropy = anisotropy;
+  return map;
 }
 
 function box(w, h, d, color) {
