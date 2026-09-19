@@ -1,33 +1,87 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { loadTexture } from './loader.js';
 
-const FLOOR_COLOR = 0x5c5f66;
-const BOX_COLOR = 0x9a9ca3;
+// A textured surface: the material, and how many metres one repeat of its texture covers.
+export function surface(textureName, tile) {
+  return { material: new THREE.MeshStandardMaterial({ map: loadTexture(textureName) }), tile };
+}
 
-// Builds a stage's lights, floor and blockout boxes. Returns what the player stands on (floors)
-// and what the player and camera collide with (walls, as axis-aligned boxes).
-export function buildLevel(scene, { floor, boxes }) {
+// Builds a stage's lights, floor, walls and ceiling. `look` gives the surfaces: { floor, wall,
+// ceiling }, plus `zones` — areas [x0, z0, x1, z1] with their own floor, and wall panels on every
+// wall face inside the area (the showers' tiles). Walls are merged into one mesh. Returns what the
+// player stands on (floors), what the player and camera collide with (walls, as axis-aligned boxes)
+// and the ceiling height.
+export function buildLevel(scene, { floor, boxes }, look) {
   scene.background = new THREE.Color(0x1d2230);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x3a3f4a, 1.2));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x6a6f7a, 1.6));
+  const sun = new THREE.DirectionalLight(0xfff6e8, 1.2);
   sun.position.set(4, 10, 6);
   scene.add(sun);
 
-  const floorMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(floor.w, 0.2, floor.d),
-    new THREE.MeshStandardMaterial({ color: FLOOR_COLOR }),
-  );
-  floorMesh.position.set(floor.x, -0.1, floor.z);
+  const whole = [floor.x - floor.w / 2, floor.z - floor.d / 2, floor.x + floor.w / 2, floor.z + floor.d / 2];
+  const floorMesh = plane(whole, 0, look.floor, true);
   scene.add(floorMesh);
+  for (const zone of look.zones) scene.add(plane(zone.area, 0.005, zone.floor, true));
+  const height = Math.max(...boxes.map((box) => box.h));
+  scene.add(plane(whole, height, look.ceiling, false));
 
-  const material = new THREE.MeshStandardMaterial({ color: BOX_COLOR });
-  const walls = boxes.map(({ x, z, w, d, h }) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-    mesh.position.set(x, h / 2, z);
-    scene.add(mesh);
-    return new THREE.Box3().setFromObject(mesh);
-  });
+  scene.add(solid(boxes.map(({ x, z, w, d, h }) => new THREE.BoxGeometry(w, h, d).translate(x, h / 2, z)), look.wall));
+  const walls = boxes.map(({ x, z, w, d, h }) => new THREE.Box3(new THREE.Vector3(x - w / 2, 0, z - d / 2), new THREE.Vector3(x + w / 2, h, z + d / 2)));
+  for (const zone of look.zones) scene.add(solid(cladding(walls, zone.area), zone.wall));
 
-  return { floors: [floorMesh], walls };
+  return { floors: [floorMesh], walls, ceiling: height };
+}
+
+// Panels 5 mm in front of every wall face (or part of one) that lies inside `area`.
+function cladding(walls, [x0, z0, x1, z1]) {
+  const panels = [];
+  const clip = (from, to, low, high) => [Math.max(from, low), Math.min(to, high)];
+  for (const { min, max } of walls) {
+    const h = max.y;
+    for (const [x, turn] of [[min.x, -Math.PI / 2], [max.x, Math.PI / 2]]) {
+      const [a, b] = clip(min.z, max.z, z0, z1);
+      if (x < x0 || x > x1 || b <= a) continue;
+      panels.push(new THREE.PlaneGeometry(b - a, h).rotateY(turn).translate(x + Math.sign(turn) * 0.005, h / 2, (a + b) / 2));
+    }
+    for (const [z, turn] of [[min.z, Math.PI], [max.z, 0]]) {
+      const [a, b] = clip(min.x, max.x, x0, x1);
+      if (z < z0 || z > z1 || b <= a) continue;
+      panels.push(new THREE.PlaneGeometry(b - a, h).rotateY(turn).translate((a + b) / 2, h / 2, z + (turn ? -0.005 : 0.005)));
+    }
+  }
+  return panels;
+}
+
+// Merges box geometries (already in place) into one mesh with a surface mapped by real size.
+export function solid(geometries, { material, tile }) {
+  const geometry = mergeGeometries(geometries);
+  worldUvs(geometry, tile);
+  return new THREE.Mesh(geometry, material);
+}
+
+// A horizontal rectangle [x0, z0, x1, z1] at height y, facing up (a floor) or down (a ceiling).
+function plane([x0, z0, x1, z1], y, { material, tile }, facingUp) {
+  const geometry = new THREE.PlaneGeometry(x1 - x0, z1 - z0)
+    .rotateX(facingUp ? -Math.PI / 2 : Math.PI / 2)
+    .translate((x0 + x1) / 2, y, (z0 + z1) / 2);
+  worldUvs(geometry, tile);
+  return new THREE.Mesh(geometry, material);
+}
+
+// Texture coordinates from world position in metres, so a texture keeps its real size on any
+// surface: floors and ceilings use x and z, walls use their length and the height.
+export function worldUvs(geometry, tile) {
+  const position = geometry.attributes.position;
+  const normal = geometry.attributes.normal;
+  const uvs = [];
+  for (let i = 0; i < position.count; i++) {
+    const [x, y, z] = [position.getX(i), position.getY(i), position.getZ(i)];
+    if (Math.abs(normal.getY(i)) > 0.5) uvs.push(x / tile, z / tile);
+    else if (Math.abs(normal.getX(i)) > 0.5) uvs.push(z / tile, y / tile);
+    else uvs.push(x / tile, y / tile);
+  }
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 }
 
 // Turns an ASCII map into a layout for buildLevel: '#' is wall, '.' is floor, and any other

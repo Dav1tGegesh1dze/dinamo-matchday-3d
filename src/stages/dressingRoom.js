@@ -1,9 +1,10 @@
 import * as THREE from 'three';
-import { buildLevel, layoutFromGrid } from '../world/level.js';
+import { buildLevel, layoutFromGrid, surface } from '../world/level.js';
+import { lockerRow, bench, treatmentBed, showerHeads, hangingSign } from '../world/fixtures.js';
 import { createPlayer } from '../world/player.js';
 import { createFollowCamera } from '../world/camera.js';
 import { createCharacter, kitPiece, KITS } from '../world/character.js';
-import { loadModel } from '../world/loader.js';
+import { loadModel, loadTexture } from '../world/loader.js';
 import { updateInteractions } from '../world/interact.js';
 import { showKit, lightKit, flash } from '../ui/hud.js';
 import { askQuestion } from '../ui/question.js';
@@ -13,9 +14,10 @@ import { listener, play, loop, loopAt } from '../world/audio.js';
 import { t } from '../lib/i18n.js';
 
 // The 2D game's map at 1.25 m per tile, so its 2-tile corridors are 2.5 m wide. Top left is the
-// dressing room (P = spawn, s = shirt, b = boots), top right the physio room (t = tape), the middle rooms are the showers, and the
-// bottom-right alcove is the tunnel mouth (C = coach). The 2D game's winding tunnel is walled off: in 3D the
-// tunnel is the scripted walk out that follows the coach.
+// dressing room (P = spawn, s = the player's locker, b = the bench with his boots), top right the
+// physio room (t = the treatment bed with the tape), the middle block is the showers, and the
+// bottom-right alcove is the tunnel mouth (C = coach). The 2D game's winding tunnel is walled off:
+// in 3D the tunnel is the scripted walk out that follows the coach.
 const MAP = [
   '###################################',
   '#......################......######',
@@ -41,13 +43,27 @@ const MAP = [
 ];
 const TILE = 1.25;
 const WALL_HEIGHT = 3;
-// The kit to find: where it is on the map, how it looks lying there, and what picking it up changes
-// on the player. The shirt and boots are the footballer model's own shirt and shoes.
+// The kit to find: how it looks lying there, and what picking it up changes on the player. The shirt
+// and boots are the footballer model's own shirt and shoes.
 const KIT = {
-  shirt: { letter: 's', look: () => kitPiece('Shirt', KITS.dinamo.Shirt), wear: { Shirt: KITS.dinamo.Shirt, Pants: KITS.dinamo.Pants } },
-  boots: { letter: 'b', look: () => kitPiece('Shoes', KITS.dinamo.Shoes), wear: { Shoes: KITS.dinamo.Shoes } },
-  tape: { letter: 't', look: async () => (await loadModel('tape')).scene, wear: { Socks: KITS.dinamo.Socks } },
+  shirt: { look: () => kitPiece('Shirt', KITS.dinamo.Shirt), wear: { Shirt: KITS.dinamo.Shirt, Pants: KITS.dinamo.Pants } },
+  boots: { look: () => kitPiece('Shoes', KITS.dinamo.Shoes), wear: { Shoes: KITS.dinamo.Shoes } },
+  tape: { look: async () => (await loadModel('tape')).scene, wear: { Socks: KITS.dinamo.Socks } },
 };
+const TAPE_SCALE = 2; // the real 5 cm roll is too small to spot
+// What the rooms are made of: tiled floor, painted walls with a Dinamo-blue band, ceiling tiles with
+// light panels, and white tiles on the shower block's floor and walls.
+const SHOWERS = [25, 12.5, 38.75, 20.5]; // [x0, z0, x1, z1] in metres
+const SHOWER_TILES = surface('shower-tiles.jpg', 1.2);
+const LOOK = {
+  floor: surface('floor-tiles.jpg', 1.8),
+  wall: surface('walls.jpg', 3),
+  ceiling: surface('ceiling.jpg', 4.8),
+  zones: [{ area: SHOWERS, floor: SHOWER_TILES, wall: SHOWER_TILES }],
+};
+const WOOD = surface('wood.jpg', 1.2);
+const SIGNS = new THREE.MeshStandardMaterial({ map: loadTexture('signs.png') });
+const SIGN_HEIGHT = 2.72; // hangs above where the camera usually is
 const GLOW = { strength: 0.6, speed: 3 }; // kit still to find pulses brighter in its own colour, to catch the eye
 const COACH_SIZE = 0.6; // the coach blocks the player like a 0.6 m wall box
 const MUSIC_VOLUME = 0.7;
@@ -60,7 +76,8 @@ export const dressingRoom = {
   async enter(go, end) {
     this.scene = new THREE.Scene();
     const layout = layoutFromGrid(MAP, TILE, WALL_HEIGHT);
-    const level = buildLevel(this.scene, layout);
+    const level = buildLevel(this.scene, layout, LOOK);
+    const rests = await this.furnish(level, layout.spots);
     this.player = await createPlayer(this.scene, level, layout.spots.P);
     this.follow = createFollowCamera(level, this.player.model);
     this.camera = this.follow.camera;
@@ -72,9 +89,11 @@ export const dressingRoom = {
     this.items = [];
     this.things = [];
     showKit(Object.keys(KIT));
-    for (const [name, { letter, look, wear }] of Object.entries(KIT)) {
+    for (const [name, { look, wear }] of Object.entries(KIT)) {
       const item = await look();
-      item.position.copy(layout.spots[letter]);
+      item.position.copy(rests[name].position);
+      item.rotation.y = rests[name].yaw;
+      if (name === 'tape') item.scale.setScalar(TAPE_SCALE);
       this.scene.add(item);
       this.items.push(item);
       const thing = {
@@ -119,6 +138,77 @@ export const dressingRoom = {
 
     this.music = await loop('maze-music', MUSIC_VOLUME);
     this.crowd = await loopAt('crowd', CROWD.volume, this.coach.object, CROWD.near);
+  },
+
+  // The rooms' furniture, props and signs. Everything solid is added to the level's walls, so the
+  // player and camera collide with it. Returns where each piece of kit rests: the player's shirt in
+  // his locker, the boots on the bench, the tape on the treatment bed.
+  async furnish(level, spots) {
+    const add = ({ object, boxes }) => {
+      this.scene.add(object);
+      level.walls.push(...boxes);
+    };
+    const prop = async (name, x, z, yaw = 0, scale = 1) => {
+      const { scene: object } = await loadModel(name);
+      object.position.set(x, 0, z);
+      object.rotation.y = yaw;
+      object.scale.setScalar(scale);
+      this.scene.add(object);
+      level.walls.push(new THREE.Box3().setFromObject(object));
+    };
+
+    // Dressing room: lockers on the west and north walls with a Dinamo shirt in each, a bench in the
+    // middle, the tactics board and a stack of crates.
+    const west = lockerRow({ axis: 'z', at: 1.25, from: 1.25, to: 8.75, inward: 1 }, WOOD);
+    const north = lockerRow({ axis: 'x', at: 1.25, from: 2.3, to: 8.75, inward: 1 }, WOOD);
+    add(west);
+    add(north);
+    const own = west.hooks.reduce((best, hook) => (hook.distanceTo(spots.s) < best.distanceTo(spots.s) ? hook : best));
+    const shirts = [...west.hooks.map((hook) => [hook, Math.PI / 2]), ...north.hooks.map((hook) => [hook, 0])];
+    for (const [hook, yaw] of shirts.filter(([hook]) => hook !== own)) {
+      const shirt = await kitPiece('Shirt', KITS.dinamo.Shirt);
+      shirt.position.copy(hook);
+      shirt.rotation.y = yaw;
+      this.scene.add(shirt);
+    }
+    const centre = bench(spots.b, 2, 'x', WOOD);
+    add(centre);
+    await prop('chalkboard', 4.6, 8.2, Math.PI);
+    await prop('crate', 2.6, 8.3);
+    await prop('crate', 3.05, 8.3, 0.3);
+    add(hangingSign(new THREE.Vector3(8.75, SIGN_HEIGHT, 5), Math.PI / 2, 0, SIGNS, WALL_HEIGHT));
+
+    // Physio room: the treatment bed, shelves against the north wall, crates in the corner.
+    const bed = treatmentBed(spots.t);
+    add(bed);
+    await prop('shelves', 33.6, 1.55, 0, 0.1);
+    await prop('shelves', 34.8, 1.55, 0, 0.1);
+    await prop('crate', 35.7, 6.9, 0.5);
+    add(hangingSign(new THREE.Vector3(28.75, SIGN_HEIGHT, 5), Math.PI / 2, 1, SIGNS, WALL_HEIGHT));
+
+    // Showers: heads on the stall walls, a wet-floor sign at the entrance.
+    const heads = [];
+    for (const z of [15, 18]) {
+      heads.push(
+        { position: new THREE.Vector3(25, 0, z), facing: [1, 0] },
+        { position: new THREE.Vector3(27.5, 0, z), facing: [-1, 0] },
+        { position: new THREE.Vector3(30, 0, z), facing: [1, 0] },
+        { position: new THREE.Vector3(32.5, 0, z), facing: [-1, 0] },
+        { position: new THREE.Vector3(36.25, 0, z), facing: [1, 0] },
+      );
+    }
+    add(showerHeads(heads));
+    await prop('wet-floor-sign', 26.8, 20.9, 0.4);
+    add(hangingSign(new THREE.Vector3(26.25, SIGN_HEIGHT, 20.3), 0, 2, SIGNS, WALL_HEIGHT));
+
+    // The tunnel mouth.
+    add(hangingSign(new THREE.Vector3(37.5, SIGN_HEIGHT, 21.9), 0, 3, SIGNS, WALL_HEIGHT));
+
+    return {
+      shirt: { position: own, yaw: Math.PI / 2 },
+      boots: { position: spots.b.clone().setY(centre.top), yaw: 0 },
+      tape: { position: spots.t.clone().add(new THREE.Vector3(0.55, bed.top, 0)), yaw: 0 },
+    };
   },
 
   exit() {
