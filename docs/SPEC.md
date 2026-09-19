@@ -391,6 +391,12 @@ bench" message.
 The Dinamo Arena from §10, with its textures. Scripted walk out of the tunnel with the camera
 following the player, a substitution board with the player's name, and the ball arriving at the
 player's feet.
+Walk-out timeline (`stages/tunnel.js`): walk 12 m out of the tunnel at 1.3 m/s, walk to the fourth
+official (in black) at the halfway line, wait 2.5 s while his board shows `▲ <name>` (HTML drawn
+over the 3D board), jog to the centre circle at 3 m/s, and a team-mate's pass rolls to the
+player's feet as he turns to face the goal at +x. The mouse still orbits the camera; left alone
+it drifts back behind the player. The ball and goals are blockout placeholders in `loader.js`
+(no CC0 football model was found yet).
 
 - [ ] Walking out shows an oval two-tier bowl under a ring roof, with blue seats, a striped pitch and `DINAMO TBILISI` boards
 - [ ] The walk out plays by itself after question 1 is answered correctly

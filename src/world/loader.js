@@ -18,6 +18,28 @@ const PLACEHOLDERS = {
     return pair;
   },
   tape: () => new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.045, 8, 20), new THREE.MeshStandardMaterial({ color: 0xffffff })),
+  ball: () => new THREE.Mesh(new THREE.IcosahedronGeometry(0.11, 2), new THREE.MeshStandardMaterial({ color: 0xffffff })),
+  board: () => box(0.9, 0.55, 0.06, 0x111111),
+  // A regulation goal (7.32 × 2.44 m) on the goal line, its mouth facing +x, with a see-through net.
+  goal: () => {
+    const goal = new THREE.Group();
+    const white = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const post = new THREE.CylinderGeometry(0.06, 0.06, 2.44);
+    for (const z of [-3.66, 3.66]) {
+      const upright = new THREE.Mesh(post, white);
+      upright.position.set(0, 1.22, z);
+      goal.add(upright);
+    }
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 7.44).rotateX(Math.PI / 2), white);
+    bar.position.y = 2.44;
+    const net = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 2.44, 7.32),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.25, side: THREE.DoubleSide }),
+    );
+    net.position.set(-1, 1.22, 0);
+    goal.add(bar, net);
+    return goal;
+  },
 };
 const gltfLoader = new GLTFLoader();
 const cache = new Map();

@@ -3,7 +3,8 @@ import { t } from './lib/i18n.js';
 import { dressingRoom } from './stages/dressingRoom.js';
 
 // Stage controller: one renderer, one canvas, one loop. The active stage owns its scene and camera,
-// and it only updates while the mouse is locked, so Escape pauses the game.
+// and it only updates while the mouse is locked, so Escape pauses the game. A stage moves on by
+// calling the `enter` it was given with the next stage; the old one keeps drawing until that is ready.
 const MAX_STEP = 0.05;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -20,8 +21,8 @@ document.addEventListener('pointerlockchange', () => {
 let stage;
 
 async function enter(next) {
+  await next.enter(enter);
   stage = next;
-  await stage.enter();
   resize();
 }
 

@@ -15,8 +15,10 @@ npm run dev
 
 ## Asset credits
 
-All CC0 (public domain), no attribution required, listed for reference:
+Listed for reference. Everything is CC0 (public domain) unless noted:
 
 - `public/assets/models/footballer.glb`: Quaternius, *Animated Men Pack*, via [poly.pizza](https://poly.pizza/m/HMnuH5geEG)
 - `public/assets/models/coach.glb`: Quaternius, *Animated Men Pack*, via [poly.pizza](https://poly.pizza/m/mQnGoME1ez)
 - `public/assets/icons/*.png`: from the 2D game `dinamo-matchday`
+- `public/assets/textures/grass.jpg`: ambientCG, *Grass 005* ([ambientcg.com](https://ambientcg.com/view?id=Grass005)), resized to 512 px
+- `public/assets/textures/seats.png`, `boards.png`: drawn for this project; the board lettering uses Noto Sans and Noto Sans Georgian (SIL Open Font License)
