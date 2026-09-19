@@ -61,7 +61,8 @@ When the club supplies real questions, the updated `questions.js` is copied in.
 or Three.js with the same rules:
 - Registration validation: name 2–20 characters, mobile 9–15 digits, a valid e-mail.
 - Question panel: shuffled answers, countdown bar, correct answer revealed on wrong or timeout.
-- Result screen: the top 10 with the current player highlighted, Play again (button or Enter),
+- Result screen: the top 10 with the current player highlighted, Restart (button or Enter) back to
+  registration for the next player,
   auto-return after 15 s.
 - Admin, on the result screen only: **Ctrl+Shift+E** exports every attempt as JSON, and
   **Ctrl+Shift+X** asks for confirmation, then resets the leaderboard.
@@ -98,7 +99,7 @@ need a whole new toolchain and share no code with the 2D game.
 index.html
 vite.config.js
 package.json
-electron/main.cjs    # copied from the 2D game (roadmap item 13)
+electron/main.cjs    # copied from the 2D game (roadmap item 16)
 public/assets/
   models/            # .glb rooms, props, characters
   textures/          # floor, wall, pitch images
@@ -215,12 +216,11 @@ real footballer in the Dinamo kit (roadmap item 2), and the stadium is recognisa
 and opponents as capsules with a coloured top. Ugly, but fully playable at the correct sizes and
 layout. Every later improvement replaces assets, not code.
 
-**Stage 2 — dressed (roadmap items 10–11).** The coach and the opponents become rigged people. Each
-room is a `.glb` assembled from a free CC0 modular interior kit: tiled floor, plastered walls,
-benches, lockers, a physio bed, shower tiles, a tunnel with a lit exit. PBR textures at 1024 px,
-repeated rather than unique.
+**Stage 2 — dressed (roadmap items 11–14).** Real kit items, a club dressing room and tunnel
+(tiled floor, painted walls, ceilings with strip lights, lockers, benches, a physio bed, showers)
+from CC0 textures and Poly Haven props, and proper duels on the pitch. See Phase 2 in the roadmap.
 
-**Stage 3 — lit (roadmap item 12).** One directional "sun" through the tunnel mouth, warm ceiling
+**Stage 3 — lit (roadmap item 15).** One directional "sun" through the tunnel mouth, warm ceiling
 lights, soft shadows near the player, and lightmaps baked in Blender for everything static. A
 little bloom on the tunnel exit and the stadium lights.
 
@@ -245,9 +245,9 @@ colour swap, not a new texture:
 - **Defenders:** the same footballer in plain red. **Goalkeeper:** the same footballer in green.
 - **Coach:** the pack's man in a suit (`coach.glb`). Clips: `Idle`, `Clapping`.
 
-The pack has no kick, tackle or dive. Those come from a CC0 animation library with a matching rig
-(first candidate: Quaternius Universal Animation Library) in roadmap item 10; until then the nearest
-existing clip plays (`Run` for tackle, `Jump` for dive and kick).
+The pack has no kick, tackle or dive, so the duels (roadmap item 14) are built from its clips:
+`Sitting` tipped back and slid along the grass is the sliding tackle, `RunningJump` hurdles it,
+`Death` is the player going down, and `Jump` celebrates.
 
 **Honest expectation:** "GTA-like" describes the camera and the feeling of walking through a real
 space. It does not mean GTA's art budget. With free assets and baked lighting this can look like a
@@ -426,7 +426,7 @@ the result follows 2.5 s later.
 
 - [ ] A complete run can be played start to finish and appears on the leaderboard
 - [ ] Every attempt, scored or not, is saved as `{ name, phone, email, timeMs, stageReached, scored, date }`
-- [ ] Play again restarts for the same player
+- [x] Play again restarts for the same player (replaced in item 10: Restart goes to registration)
 - [ ] Ctrl+Shift+E exports every attempt with contact details; Ctrl+Shift+X resets after confirmation
 
 ### 9. `feature/audio` — the 2D sounds in 3D
@@ -442,23 +442,78 @@ as positional audio at the tunnel mouth, and the dressing-room music loop. Foots
 
 **→ At this point the game is fully playable. Everything below is graphics and packaging.**
 
-### 10. `feature/characters` — real people for everyone else
+## Phase 2: the developer's feedback after playing (items 10–14)
 
-The defenders and keeper from §9 replace their capsules (the coach arrived in item 4). Kick, tackle and dive clips from a
-CC0 animation library.
+The developer played the full game and asked for:
+1. **Kit you actually put on.** Start in training clothes; the items must look like real football
+   things; picking one up changes what the player wears.
+2. **A proper duel with each opponent.** The defender runs in and slides in for the tackle; a right
+   answer jumps it and carries on, a wrong one ends with the player on the grass.
+3. **Restart, win or lose, back to the registration screen** for the next player, not the same
+   player again. (No password: registration is name, mobile and e-mail as in the 2D game. There
+   are no accounts, and a browser cannot keep passwords safely on a shared stand.)
+4. **A dressing room and tunnel that look like a real stadium's**, not grey blocks.
 
-- [ ] The defenders and keeper are people, not capsules, and they animate
-- [ ] The player kicks on the goal; defenders tackle; the keeper dives
+**What the assets allow** (checked): Poly Haven (CC0, realistic) has a football, medical tape,
+fluorescent ceiling lights, a wooden bench, a chalkboard, shelves, crates, a wet-floor sign and bins,
+but no lockers, football shirts or boots. The footballer model's own shirt, shown on its own, is a
+real football shirt shape, and its shoes can be split off as a pair of boots, so those come from the
+character file itself. Lockers are part of the room architecture (wood-textured cubicles). Poly
+Haven models are converted offline to `.glb` with 512 px WebP textures (about 0.3 MB each).
+
+### 10. `feature/restart` — the next player
+
+The result screen's button becomes **Restart** (Enter too), for a win or a loss: it goes to the
+registration screen with empty fields, the same place the 15 s auto-return goes.
+
+- [ ] After a goal and after a loss, Restart shows an empty registration form
+- [ ] Enter on the result screen does the same
+
+### 11. `feature/wear-kit` — kit you put on
+
+The player starts in a grey training T-shirt, black shorts, dark socks and white trainers. The items:
+the Dinamo shirt hanging in the player's locker (the footballer model's own shirt), the boots on the
+bench (its shoes, split into their own `Shoes` material offline), and Poly Haven's medical tape on
+the physio bed. Picking up the shirt dresses him in the blue shirt and shorts, the boots swap the
+trainers for black boots, and the tape shows as white tape round his ankles.
+
+- [ ] He starts in training clothes and each pickup visibly changes what he wears
+- [ ] The shirt, boots and tape look like the real things, not blocks
+
+### 12. `feature/real-dressing-room` — a club dressing room
+
+Textures from ambientCG (tiled floor, painted walls with a Dinamo-blue band, ceiling tiles) and
+ceilings at 3 m with Poly Haven fluorescent lights. The dressing room gets lockers round the walls
+with a Dinamo shirt in each and a bench in front, a tactics chalkboard and a crate of footballs; the
+physio room a treatment bed; the showers wall tiles and a wet-floor sign; bins and shelves in the
+corridors. Collision boxes cover the furniture.
+
+- [ ] No grey blockout boxes remain in the dressing-room stage
+- [ ] Every room is recognisable (dressing room, physio, showers, corridor, tunnel mouth)
+- [ ] Collision matches the furniture, nobody gets stuck, the camera stays under the ceiling
+- [ ] Still 60 fps
+
+### 13. `feature/real-tunnel` — the players' tunnel
+
+The stadium tunnel in concrete with Dinamo-blue panels, the club name and crest, ceiling lights
+and a floor mat, opening onto the bright pitch; the dressing room's tunnel mouth matches it.
+
+- [ ] The walk out starts in a lit, branded tunnel and ends in daylight
+- [ ] Still 60 fps
+
+### 14. `feature/pitch-duels` — defenders tackle, the keeper dives
+
+Each defender runs at the player and slides in (the `Sitting` pose tipped back and slid along the
+grass). The question appears as he slides. Right: the player hurdles the tackle (`RunningJump`)
+and carries on. Wrong: the tackle takes the ball and the player goes down (`Death`, the fall). The
+keeper dives the wrong way on a goal and the right way on a save; the player celebrates a goal
+(`Jump`). The football becomes Poly Haven's football model.
+
+- [ ] Each defender runs in and slides; a right answer hurdles him, a wrong one floors the player
+- [ ] The keeper dives on every shot; a goal is celebrated
 - [ ] Still 60 fps with four characters on screen
 
-### 11. `feature/models` — dress the world
-
-Replace the blockout boxes with `.glb` rooms and props from CC0 kits, with PBR textures.
-
-- [ ] No untextured grey boxes remain
-- [ ] Collision boxes still match the visible walls and furniture
-
-### 12. `feature/lighting` — make it look good
+### 15. `feature/lighting` — make it look good
 
 Baked lightmaps for static geometry, one sun through the tunnel, warm interior lights, soft shadows,
 a little bloom, and a colour grade.
@@ -467,7 +522,7 @@ a little bloom, and a colour grade.
 - [ ] The tunnel exit is a bright, inviting target
 - [ ] Still 60 fps on the stand laptop
 
-### 13. `feature/stand-mode` — kiosk and downloads
+### 16. `feature/stand-mode` — kiosk and downloads
 
 Fullscreen on Start, no right-click, pixel-ratio cap, offline check. Copy `electron/main.cjs` and
 `release.yml` from the 2D repo so GitHub Actions builds the Mac and Windows apps and publishes them
