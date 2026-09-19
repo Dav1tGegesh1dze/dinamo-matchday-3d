@@ -7,7 +7,7 @@ import { showResult } from './ui/result.js';
 import { showTimer } from './ui/hud.js';
 import { play as playSound, unlockAudio } from './world/audio.js';
 
-// Game flow: registration → dressing room → tunnel → pitch → result → play again or registration.
+// Game flow: registration → dressing room → tunnel → pitch → result → registration for the next player.
 // Stage controller: one renderer, one canvas, one loop. The active stage owns its scene and camera,
 // and it only updates while the mouse is locked, so Escape pauses the game. A stage moves on with
 // go(next stage), which keeps the old one drawing until the next is ready, and calls end() when the
@@ -39,11 +39,11 @@ function end() {
     document.exitPointerLock();
     stage.exit?.();
     stage = null;
-    showResult(() => play(run), () => showRegistration(play));
+    showResult(() => showRegistration(play));
   }, RESULT_DELAY_MS);
 }
 
-// Start and Play again are clicks (or Enter), so the mouse can be locked straight away.
+// Start is a click (or Enter), so the mouse can be locked straight away.
 function play(player) {
   unlockAudio();
   playSound('whistle');

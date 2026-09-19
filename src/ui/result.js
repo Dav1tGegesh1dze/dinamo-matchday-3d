@@ -10,8 +10,7 @@ const screen = document.getElementById('result');
 const headline = document.getElementById('headline');
 const subtitle = document.getElementById('subtitle');
 const rows = document.getElementById('rows');
-const again = document.getElementById('again');
-let playAgain = null;
+const restart = document.getElementById('restart');
 let leave = null;
 let returnTimer = 0;
 
@@ -22,10 +21,10 @@ function close(next) {
   next();
 }
 
-// Enter plays again; hidden admin keys, only on this screen: Ctrl+Shift+E exports every attempt,
+// Enter restarts; hidden admin keys, only on this screen: Ctrl+Shift+E exports every attempt,
 // Ctrl+Shift+X asks, then wipes the leaderboard and goes back to registration.
 function onKey(event) {
-  if (event.key === 'Enter') return close(playAgain);
+  if (event.key === 'Enter') return close(leave);
   if (!event.ctrlKey || !event.shiftKey) return;
   if (event.code === 'KeyE') exportJson();
   if (event.code === 'KeyX' && window.confirm(t('confirmReset'))) {
@@ -41,12 +40,11 @@ function row(rank, attempt, own) {
   return item;
 }
 
-again.addEventListener('click', () => close(playAgain));
+restart.addEventListener('click', () => close(leave));
 
-// Saves this run's attempt and shows it with the leaderboard. `again()` restarts for the same player;
-// after 15 s, or after a reset, `back()` returns to registration.
-export function showResult(againFn, back) {
-  playAgain = againFn;
+// Saves this run's attempt and shows it with the leaderboard. Restart (or Enter), 15 s passing, or
+// an admin reset all call `back()`, which returns to registration for the next player.
+export function showResult(back) {
   leave = back;
   const attempt = {
     name: run.name,
@@ -64,7 +62,7 @@ export function showResult(againFn, back) {
     ? `${t('yourTime')}: ${formatTime(attempt.timeMs)}`
     : `${t('outAt')}: ${t(`stage${run.stage}`)}`;
   document.getElementById('board-title').textContent = t('leaderboard');
-  again.textContent = t('retry');
+  restart.textContent = t('restart');
 
   const ranked = getRanked();
   const own = ranked.findIndex((a) => a.date === attempt.date);
