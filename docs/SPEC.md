@@ -378,6 +378,9 @@ costs no more than a capsule; the kit items are blockout placeholders in `loader
 
 Copy `questions.js` and `run.js` from the 2D repo (`i18n.js` came in item 1). HTML question panel
 over the frozen 3D world, shuffled answers, countdown bar, reveal on wrong, mouse released while it is open.
+Same timings as the 2D game: 0.6 s to confirm a right answer, 1.5 s to show the right one after a
+wrong answer or timeout. Until the result screen exists (item 8), game over is the red "Stay on the
+bench" message.
 
 - [ ] Reaching the coach with the kit asks question 1 with a 20 s countdown
 - [ ] Georgian by default, English when chosen
