@@ -28,11 +28,12 @@ const TEAMMATE = new THREE.Vector3(-16.6, 0, -14.4); // stands just behind the b
 const TURN_RATE = 8;
 
 export const tunnel = {
-  scene: new THREE.Scene(),
+  scene: null,
   camera: null,
 
   async enter(go) {
     this.go = go;
+    this.scene = new THREE.Scene();
     showKit([]);
     showPrompt(null);
     const { walls } = buildStadium(this.scene);

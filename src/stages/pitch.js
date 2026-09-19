@@ -46,7 +46,8 @@ export const pitch = {
   scene: null,
   camera: null,
 
-  async enter() {
+  async enter(go, end) {
+    this.end = end;
     this.scene = tunnel.scene;
     this.camera = tunnel.camera;
     this.action = null;
@@ -136,6 +137,7 @@ export const pitch = {
     });
     finishRun(false);
     flash(t('tackled'));
+    this.end();
   },
 
   // The shot goes into the top corner while the keeper dives the other way. The clock stops on the
@@ -156,6 +158,7 @@ export const pitch = {
       return progress === 1;
     });
     flash(t('goal'));
+    this.end();
   },
 
   // The shot goes straight into the keeper's hands; the run ends.
@@ -171,6 +174,7 @@ export const pitch = {
     });
     keeper.moveAt(0);
     flash(t('saved'));
+    this.end();
   },
 
   // The ball in flight: a straight line from `from` to `to`, lifted into an arc.

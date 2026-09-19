@@ -14,6 +14,14 @@ const EASE_OUT_RATE = 5;
 const DRIFT_RATE = 1.2; // how fast driftBehind swings the camera round
 const HIDE_DISTANCE = 0.9; // closer than this, the player model is hidden so it doesn't fill the view
 
+// The mouse turns whichever follow camera was created last (each run creates new ones).
+let current = null;
+document.addEventListener('mousemove', (event) => {
+  if (!document.pointerLockElement || !current) return;
+  current.yaw -= event.movementX * SENSITIVITY;
+  current.pitch = THREE.MathUtils.clamp(current.pitch + event.movementY * SENSITIVITY, MIN_PITCH, MAX_PITCH);
+});
+
 // Third-person follow camera. The mouse orbits it around the player (yaw around, pitch up and down).
 // Raycasts against the wall boxes pull it in front of any wall between the player's head and where
 // it wants to be; it eases back out when the space opens up.
@@ -76,11 +84,6 @@ export function createFollowCamera({ walls }, subject) {
     return Math.max(free, 0);
   }
 
-  document.addEventListener('mousemove', (event) => {
-    if (!document.pointerLockElement) return;
-    rig.yaw -= event.movementX * SENSITIVITY;
-    rig.pitch = THREE.MathUtils.clamp(rig.pitch + event.movementY * SENSITIVITY, MIN_PITCH, MAX_PITCH);
-  });
-
+  current = rig;
   return rig;
 }

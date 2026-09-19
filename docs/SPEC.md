@@ -419,7 +419,10 @@ player clicks once. The pitch stage shares the scene the tunnel stage built.
 ### 8. `feature/registration-and-result` — the full loop
 
 Copy `leaderboard.js`. HTML registration form (username, mobile, e-mail, with the 2D validation
-rules) and a result screen with the top 10, Play again, 15 s auto-return, and the admin shortcuts.
+rules) and a result screen with the top 10, Play again, 15 s auto-return, and the admin shortcuts. The
+HUD gains the run timer. Start and Play again are clicks (or Enter), so they lock the mouse at once.
+Every run builds fresh stage scenes. After "GOAL!", "Tackled!", "Saved!" or "Stay on the bench"
+the result follows 2.5 s later.
 
 - [ ] A complete run can be played start to finish and appears on the leaderboard
 - [ ] Every attempt, scored or not, is saved as `{ name, phone, email, timeMs, stageReached, scored, date }`

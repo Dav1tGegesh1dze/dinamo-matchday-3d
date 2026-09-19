@@ -40,6 +40,34 @@
       #bar { flex: 1; height: 16px; border-radius: 8px; background: #ffd500; transform-origin: left; }
       [hidden] { display: none !important; }
       body:has(#question:not([hidden])) :is(#overlay, #prompt) { display: none; }
+      body:has(.screen:not([hidden])) :is(#overlay, #prompt, #kit, #timer, #message, #board) { display: none; }
+      #timer {
+        position: fixed; top: 16px; right: 16px; padding: 4px 14px; border-radius: 8px;
+        background: rgba(0, 0, 0, 0.55); color: #fff; font: bold 34px monospace;
+      }
+      .screen {
+        position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 14px; background: radial-gradient(circle at 50% 30%, #1450a0, #061d4a); color: #fff; font-family: sans-serif;
+      }
+      .screen h1 { margin: 0; font-size: 52px; }
+      #crest { width: 96px; height: 96px; image-rendering: pixelated; }
+      #registration input {
+        width: 480px; padding: 10px 16px; border: 3px solid #fff; border-radius: 8px; box-sizing: border-box;
+        font-size: 26px; text-align: center; color: #0b3d91; outline: none;
+      }
+      #error { min-height: 30px; margin: 0; color: #ffd500; font-size: 22px; }
+      .screen button.red {
+        padding: 14px 40px; border: 0; border-radius: 10px; background: #e30613; color: #fff; font: bold 32px sans-serif; cursor: pointer;
+      }
+      .screen button.red.dim { opacity: 0.4; }
+      #languages { position: fixed; right: 24px; bottom: 20px; display: flex; gap: 10px; }
+      #languages button { border: 0; background: none; color: #7f9bd1; font: 26px sans-serif; cursor: pointer; }
+      #languages button.chosen { color: #fff; font-weight: bold; }
+      #subtitle { margin: 0; color: #ffd500; font-size: 32px; }
+      #board-title { margin: 12px 0 0; color: #7f9bd1; font-size: 28px; }
+      #rows { margin: 0; padding: 0; list-style: none; font-size: 26px; line-height: 1.45; text-align: center; }
+      #rows .own { color: #ffd500; font-weight: bold; }
+      #again { margin-top: 12px; }
     </style>
   </head>
   <body>
@@ -47,7 +75,25 @@
     <div id="prompt" hidden></div>
     <div id="message" hidden></div>
     <div id="board" hidden></div>
+    <div id="timer"></div>
     <div id="overlay"></div>
+    <section id="registration" class="screen" hidden>
+      <img id="crest" src="assets/icons/crest.png" alt="" />
+      <h1 id="title"></h1>
+      <input id="name" maxlength="20" autocomplete="off" />
+      <input id="phone" maxlength="20" inputmode="tel" autocomplete="off" />
+      <input id="email" maxlength="40" autocomplete="off" />
+      <p id="error"></p>
+      <button id="start" class="red"></button>
+      <div id="languages"><button data-lang="ka">KA</button><button data-lang="en">EN</button></div>
+    </section>
+    <section id="result" class="screen" hidden>
+      <h1 id="headline"></h1>
+      <p id="subtitle"></p>
+      <h2 id="board-title"></h2>
+      <ul id="rows"></ul>
+      <button id="again" class="red"></button>
+    </section>
     <div id="question" hidden>
       <p id="question-text"></p>
       <div id="answers"></div>
