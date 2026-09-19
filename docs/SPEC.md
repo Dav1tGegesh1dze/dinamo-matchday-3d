@@ -17,6 +17,8 @@ own Dinamo player, seen from behind like GTA. The 3D game **replaces** the 2D ga
 | Stand device | **Laptop with mouse and keyboard**. No touch controls |
 | 3D assets | **Free CC0 packs** (Kenney, Quaternius, Poly Haven, Mixamo) |
 | Relation to the 2D game | **Replaces it**. One game at the stand, with its own leaderboard |
+| Run length | **About 3 minutes is fine** |
+| Kits | **Player: Dinamo blue and white.** Defenders: plain red (a fictional rival, no real club's kit). Goalkeeper: green |
 
 ---
 
@@ -228,8 +230,8 @@ through the same loader, so replacing them later changes no game code.
 **Characters.** One rigged human model is reused for everyone, with kit colours swapped by material:
 - **Player:** Dinamo blue and white. Clips: `idle`, `walk`, `jog`, `kick`.
 - **Coach:** tracksuit. Clips: `idle`, `talk`.
-- **Defenders:** opponent colours. Clips: `idle`, `run`, `tackle`.
-- **Goalkeeper:** keeper kit. Clips: `idle`, `dive`.
+- **Defenders:** plain red. Clips: `idle`, `run`, `tackle`.
+- **Goalkeeper:** green. Clips: `idle`, `dive`.
 
 **Honest expectation:** "GTA-like" describes the camera and the feeling of walking through a real
 space. It does not mean GTA's art budget. With free assets and baked lighting this can look like a
@@ -381,10 +383,3 @@ on the Releases page.
 - [ ] Start enters fullscreen and a full run works with no internet
 - [ ] A tagged build publishes downloadable Mac and Windows files
 
----
-
-## Open questions for the developer
-
-1. Is a ~3 minute run acceptable, given walking in 3D is slower than the top-down maze? The
-   dressing room is sized for 40–70 s so the total should stay close to 3 minutes.
-2. Opponent kit colours: a specific rival club, or a neutral red?
