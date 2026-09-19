@@ -16,7 +16,7 @@ export function buildLevel(scene, { floor, boxes }) {
     new THREE.BoxGeometry(floor.w, 0.2, floor.d),
     new THREE.MeshStandardMaterial({ color: FLOOR_COLOR }),
   );
-  floorMesh.position.y = -0.1;
+  floorMesh.position.set(floor.x, -0.1, floor.z);
   scene.add(floorMesh);
 
   const material = new THREE.MeshStandardMaterial({ color: BOX_COLOR });
@@ -28,4 +28,31 @@ export function buildLevel(scene, { floor, boxes }) {
   });
 
   return { floors: [floorMesh], walls };
+}
+
+// Turns an ASCII map into a layout for buildLevel: '#' is wall, '.' is floor, and any other
+// character marks a named spot on the floor (returned in `spots`). Row 0 is north (−z), column 0 is
+// west (−x). Neighbouring wall tiles are merged into as few boxes as possible, to keep draw calls low.
+export function layoutFromGrid(rows, tile, wallHeight) {
+  const used = rows.map((row) => [...row].map((ch) => ch !== '#'));
+  const isFreeWall = (r, c) => r < rows.length && c < rows[r].length && !used[r][c];
+  const boxes = [];
+  const spots = {};
+
+  rows.forEach((row, r) => {
+    [...row].forEach((ch, c) => {
+      if (ch !== '#' && ch !== '.') spots[ch] = new THREE.Vector3((c + 0.5) * tile, 0, (r + 0.5) * tile);
+      if (!isFreeWall(r, c)) return;
+      let w = 1;
+      while (isFreeWall(r, c + w)) w++;
+      let d = 1;
+      while ([...Array(w).keys()].every((i) => isFreeWall(r + d, c + i))) d++;
+      for (let dr = 0; dr < d; dr++) for (let dc = 0; dc < w; dc++) used[r + dr][c + dc] = true;
+      boxes.push({ x: (c + w / 2) * tile, z: (r + d / 2) * tile, w: w * tile, d: d * tile, h: wallHeight });
+    });
+  });
+
+  const width = rows[0].length * tile;
+  const depth = rows.length * tile;
+  return { floor: { x: width / 2, z: depth / 2, w: width, d: depth }, boxes, spots };
 }

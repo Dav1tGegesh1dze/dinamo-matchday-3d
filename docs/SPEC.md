@@ -354,7 +354,10 @@ Replace the capsule with the Animated Men Pack footballer (§9), loaded as a `.g
 
 Dressing room, corridor, physio room, showers and tunnel mouth at true scale, with corridors and
 doorways at least 2.5 m wide, laid out so a first-time player needs 40–70 s. Doorways, no ceilings
-yet.
+yet. The layout is the 2D game's map at 1.25 m per tile, written as an ASCII grid in
+`dressingRoom.js`. The 2D game's winding tunnel loop is walled off, and the coach stands in the
+alcove at its entrance (the tunnel mouth), because in 3D the tunnel is the scripted walk that
+follows. Shortest route spawn → shirt → boots → tape → coach: 131 m, 42 s at a jog.
 
 - [ ] All five spaces exist and connect as described
 - [ ] A first run through takes 40–70 s
