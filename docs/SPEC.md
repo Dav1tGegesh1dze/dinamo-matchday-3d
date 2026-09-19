@@ -507,11 +507,12 @@ Each defender runs at the player and slides in (the `Sitting` pose tipped back a
 grass). The question appears as he slides. Right: the player hurdles the tackle (`RunningJump`)
 and carries on. Wrong: the tackle takes the ball and the player goes down (`Death`, the fall). The
 keeper dives the wrong way on a goal and the right way on a save; the player celebrates a goal
-(`Jump`). The football becomes Poly Haven's football model.
+(`Jump`). The player's strike is the `RunningJump` leg swing. Poly Haven's footballs are old and
+deflated, so the ball stays a white placeholder sphere for now.
 
-- [ ] Each defender runs in and slides; a right answer hurdles him, a wrong one floors the player
-- [ ] The keeper dives on every shot; a goal is celebrated
-- [ ] Still 60 fps with four characters on screen
+- [x] Each defender runs in and slides; a right answer hurdles him, a wrong one floors the player
+- [x] The keeper dives on every shot; a goal is celebrated
+- [x] Still 60 fps with four characters on screen
 
 ### 15. `feature/lighting` — make it look good
 
