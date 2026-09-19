@@ -52,14 +52,19 @@ const KIT = {
 };
 const TAPE_SCALE = 2; // the real 5 cm roll is too small to spot
 // What the rooms are made of: tiled floor, painted walls with a Dinamo-blue band, ceiling tiles with
-// light panels, and white tiles on the shower block's floor and walls.
+// light panels, white tiles on the shower block's floor and walls, and the tunnel's branded panels
+// and rubber mat at the tunnel mouth.
 const SHOWERS = [25, 12.5, 38.75, 20.5]; // [x0, z0, x1, z1] in metres
 const SHOWER_TILES = surface('shower-tiles.jpg', 1.2);
+const TUNNEL_MOUTH = [36.25, 20.5, 42.5, 25]; // the alcove where the coach waits, dressed like the tunnel
 const LOOK = {
   floor: surface('floor-tiles.jpg', 1.8),
   wall: surface('walls.jpg', 3),
   ceiling: surface('ceiling.jpg', 4.8),
-  zones: [{ area: SHOWERS, floor: SHOWER_TILES, wall: SHOWER_TILES }],
+  zones: [
+    { area: SHOWERS, floor: SHOWER_TILES, wall: SHOWER_TILES },
+    { area: TUNNEL_MOUTH, floor: surface('rubber.png', 1), wall: surface('tunnel-wall.png', 3) },
+  ],
 };
 const WOOD = surface('wood.jpg', 1.2);
 const SIGNS = new THREE.MeshStandardMaterial({ map: loadTexture('signs.png') });

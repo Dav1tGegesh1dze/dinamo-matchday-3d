@@ -498,8 +498,8 @@ corridors. Collision boxes cover the furniture.
 The stadium tunnel in concrete with Dinamo-blue panels, the club name and crest, ceiling lights
 and a floor mat, opening onto the bright pitch; the dressing room's tunnel mouth matches it.
 
-- [ ] The walk out starts in a lit, branded tunnel and ends in daylight
-- [ ] Still 60 fps
+- [x] The walk out starts in a lit, branded tunnel and ends in daylight
+- [x] Still 60 fps
 
 ### 14. `feature/pitch-duels` — defenders tackle, the keeper dives
 

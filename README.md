@@ -26,3 +26,4 @@ Listed for reference. Everything is CC0 (public domain) unless noted:
 - `public/assets/textures/floor-tiles.jpg`, `shower-tiles.jpg`, `ceiling.jpg`, `wood.jpg`: ambientCG *Tiles 140*, *Tiles 133 A*, *Office Ceiling 003*, *Wood 095*, resized to 512 px
 - `public/assets/textures/walls.jpg`: ambientCG *Painted Plaster 017* with the Dinamo-blue band added; `signs.png`: drawn for this project (Noto fonts, SIL Open Font License)
 - `public/assets/models/chalkboard.glb`, `crate.glb`, `shelves.glb`, `wet-floor-sign.glb`: Poly Haven *Standing Chalkboard 01*, *Plastic Crate 01*, *Steel Frame Shelves 01*, *Wet Floor Sign 01*, converted to `.glb` with 512 px WebP textures
+- `public/assets/textures/tunnel-wall.png`, `rubber.png`: drawn for this project (Noto fonts, SIL Open Font License)
