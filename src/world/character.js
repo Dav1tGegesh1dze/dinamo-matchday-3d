@@ -7,12 +7,13 @@ export const KITS = {
 };
 
 const FADE_SECONDS = 0.25;
+const PACK_SCALE = 0.374; // Animated Men Pack models are 4.81 units tall; this makes them 1.8 m
 
 // A rigged person: the model, its kit colours, and its animation clips by short name
 // ('HumanArmature|Man_Walk' → 'Walk'). play(name) cross-fades from the current clip.
-export async function createCharacter(name, kit, scale) {
+export async function createCharacter(name, kit) {
   const { scene, animations } = await loadModel(name);
-  scene.scale.setScalar(scale);
+  scene.scale.setScalar(PACK_SCALE);
   scene.traverse((node) => {
     if (!node.isMesh) return;
     node.material = node.material.clone(); // copies share materials; each person gets their own colours

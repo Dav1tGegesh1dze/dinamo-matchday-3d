@@ -31,6 +31,11 @@ const strings = {
     confirmReset: 'წავშალოთ ყველა შედეგი?',
     retry: 'თავიდან',
     clickToStart: 'დააწკაპუნე დასაწყებად',
+    pickUp: 'აიღე',
+    shirt: 'მაისური',
+    boots: 'ბუცები',
+    tape: 'ტეიპი',
+    talkToCoach: 'დაელაპარაკე მწვრთნელს',
   },
   en: {
     title: 'Dinamo: Road to Goal',
@@ -62,6 +67,11 @@ const strings = {
     confirmReset: 'Delete all results?',
     retry: 'Play again',
     clickToStart: 'Click to start',
+    pickUp: 'Pick up',
+    shirt: 'shirt',
+    boots: 'boots',
+    tape: 'tape',
+    talkToCoach: 'Talk to the coach',
   },
 };
 

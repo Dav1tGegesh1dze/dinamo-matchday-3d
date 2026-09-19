@@ -7,7 +7,6 @@ const SPRINT_SPEED = 5;
 const GRAVITY = 20;
 const STEP_HEIGHT = 0.5; // the floor raycast starts this far above the feet, so small steps are climbed
 const TURN_RATE = 12;
-const MODEL_SCALE = 0.374; // the footballer model is 4.81 units tall; this makes him 1.8 m
 // The Run clip's feet move at about 3.4 m/s; these playback speeds keep them from sliding.
 // (The Walk clip only looks right up to about 1.3 m/s, so it is not used for the player.)
 const JOG_CLIP_SPEED = JOG_SPEED / 3.4;
@@ -24,7 +23,7 @@ function axis(positive, negative) {
 // The player: a footballer in the Dinamo kit who jogs relative to the camera, turns to face where
 // he goes, slides along walls (as a capsule) and stays on the floor.
 export async function createPlayer(scene, { floors, walls }, spawn) {
-  const character = await createCharacter('footballer', KITS.dinamo, MODEL_SCALE);
+  const character = await createCharacter('footballer', KITS.dinamo);
   const model = character.object;
   model.position.copy(spawn);
   model.rotation.y = Math.PI;
