@@ -46,10 +46,11 @@ const ITEM_SPIN = 1.5; // radians per second
 const COACH_SIZE = 0.6; // the coach blocks the player like a 0.6 m wall box
 
 export const dressingRoom = {
-  scene: new THREE.Scene(),
+  scene: null,
   camera: null,
 
-  async enter(go) {
+  async enter(go, end) {
+    this.scene = new THREE.Scene();
     const layout = layoutFromGrid(MAP, TILE, WALL_HEIGHT);
     const level = buildLevel(this.scene, layout);
     this.player = await createPlayer(this.scene, level, layout.spots.P);
@@ -98,6 +99,7 @@ export const dressingRoom = {
         } else {
           finishRun(false);
           flash(t('stayOnBench'));
+          end();
         }
       },
     };

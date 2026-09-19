@@ -1,11 +1,12 @@
 // The HTML layer over the 3D view: kit icons (dim until picked up), the interaction prompt, short
-// messages such as "Get ready first!", and the substitution board's text.
+// messages such as "Get ready first!", the substitution board's text and the run timer.
 const MESSAGE_SECONDS = 2;
 
 const kit = document.getElementById('kit');
 const prompt = document.getElementById('prompt');
 const message = document.getElementById('message');
 const board = document.getElementById('board');
+const timer = document.getElementById('timer');
 let messageTimer = 0;
 
 export function showKit(items) {
@@ -45,4 +46,16 @@ export function showBoard(text, x, y) {
 
 export function hideBoard() {
   board.hidden = true;
+}
+
+export function formatTime(ms) {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = Math.floor((ms % 60000) / 1000);
+  const tenths = Math.floor((ms % 1000) / 100);
+  return `${minutes}:${String(seconds).padStart(2, '0')}.${tenths}`;
+}
+
+// The run clock: counts from Start and freezes when the run finishes.
+export function showTimer({ startedAt, finishedAt }) {
+  timer.textContent = formatTime((finishedAt || Date.now()) - startedAt);
 }
