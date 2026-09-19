@@ -6,6 +6,7 @@ import { flash } from '../ui/hud.js';
 import { finishRun } from '../lib/run.js';
 import { t } from '../lib/i18n.js';
 import { tunnel } from './tunnel.js';
+import { play as playSound } from '../world/audio.js';
 
 // The attack on the goal at +x, in the stadium the tunnel stage built. The player dribbles up to
 // each opponent and is asked questions 2, 3 and 4. Right: he beats the defender, or scores past
@@ -64,6 +65,10 @@ export const pitch = {
     for (const opponent of tunnel.opponents) opponent.update(dt);
     tunnel.follow.driftBehind(dt);
     tunnel.follow.update(dt);
+  },
+
+  exit() {
+    tunnel.crowd.stop();
   },
 
   // Runs `step(dt)` every frame until it returns true.
@@ -136,6 +141,7 @@ export const pitch = {
       return time === POKE.seconds;
     });
     finishRun(false);
+    playSound('tackle');
     flash(t('tackled'));
     this.end();
   },
@@ -157,6 +163,7 @@ export const pitch = {
       keeper.object.rotation.z = -DIVE.lean * dive;
       return progress === 1;
     });
+    playSound('goal');
     flash(t('goal'));
     this.end();
   },
@@ -173,6 +180,7 @@ export const pitch = {
       return time === SHOT.seconds;
     });
     keeper.moveAt(0);
+    playSound('save');
     flash(t('saved'));
     this.end();
   },

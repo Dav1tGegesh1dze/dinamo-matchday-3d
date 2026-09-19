@@ -5,12 +5,13 @@ import { dressingRoom } from './stages/dressingRoom.js';
 import { showRegistration } from './ui/registration.js';
 import { showResult } from './ui/result.js';
 import { showTimer } from './ui/hud.js';
+import { play as playSound, unlockAudio } from './world/audio.js';
 
 // Game flow: registration → dressing room → tunnel → pitch → result → play again or registration.
 // Stage controller: one renderer, one canvas, one loop. The active stage owns its scene and camera,
 // and it only updates while the mouse is locked, so Escape pauses the game. A stage moves on with
 // go(next stage), which keeps the old one drawing until the next is ready, and calls end() when the
-// run is over.
+// run is over. A stage may have exit(), called when it stops being shown (it stops its sounds).
 const MAX_STEP = 0.05;
 const RESULT_DELAY_MS = 2500; // time to read "GOAL!" or "Tackled!" before the result screen
 
@@ -28,6 +29,7 @@ let stage = null;
 
 async function go(next) {
   await next.enter(go, end);
+  stage?.exit?.();
   stage = next;
   resize();
 }
@@ -35,6 +37,7 @@ async function go(next) {
 function end() {
   setTimeout(() => {
     document.exitPointerLock();
+    stage.exit?.();
     stage = null;
     showResult(() => play(run), () => showRegistration(play));
   }, RESULT_DELAY_MS);
@@ -42,6 +45,8 @@ function end() {
 
 // Start and Play again are clicks (or Enter), so the mouse can be locked straight away.
 function play(player) {
+  unlockAudio();
+  playSound('whistle');
   startRun(player);
   overlay.textContent = t('clickToPlay');
   renderer.domElement.requestPointerLock();

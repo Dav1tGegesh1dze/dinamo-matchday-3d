@@ -1,6 +1,7 @@
 import { questions, COUNTDOWN_SECONDS, POOL_BY_STAGE } from '../data/questions.js';
 import { getLang } from '../lib/i18n.js';
 import { setStage } from '../lib/run.js';
+import { play } from '../world/audio.js';
 
 const REVEAL_MS = 1500; // how long a wrong answer shows the right one
 const CONFIRM_MS = 600;
@@ -43,6 +44,7 @@ export function askQuestion(stage) {
       buttons.forEach((b) => (b.disabled = true));
       const right = buttons.find((b) => Number(b.dataset.index) === entry.correct);
       right.classList.add('right');
+      play(button === right ? 'correct' : 'wrong');
       if (button && button !== right) button.classList.add('wrong');
       setTimeout(() => {
         panel.hidden = true;

@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import { createCharacter, turnTowards, KITS } from './character.js';
+import { play } from './audio.js';
 
 const RADIUS = 0.35;
 const JOG_SPEED = 3;
 const SPRINT_SPEED = 5;
 const GRAVITY = 20;
 const TURN_RATE = 12;
+const STRIDE = 1.5; // metres per footstep at a jog (the Run clip covers 3 m per cycle, two steps)
+const STEP_VOLUME = 0.4;
 const STEP_HEIGHT = 0.5; // the floor raycast starts this far above the feet, so small steps are climbed
 
 const keys = new Set();
@@ -31,6 +34,7 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
   const rayOrigin = new THREE.Vector3();
   const rayDirection = new THREE.Vector3(0, -1, 0);
   let fallSpeed = 0;
+  let sinceStep = 0;
 
   return {
     model,
@@ -50,6 +54,11 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
 
         turnTowards(model, x, z, TURN_RATE * dt);
         character.moveAt(speed);
+        sinceStep += speed * dt;
+        if (sinceStep >= STRIDE) {
+          sinceStep -= STRIDE;
+          play('step', STEP_VOLUME);
+        }
       } else {
         character.moveAt(0);
       }
