@@ -19,7 +19,8 @@ graphics. One laptop with mouse and keyboard, one player at a time, about 3 minu
 5. **Defender 1** – Question 2 (medium). Correct → go past. Wrong → tackled → game over.
 6. **Defender 2** – Question 3 (hard).
 7. **Goalkeeper** – one-on-one, Question 4 (hardest). Correct → GOAL, timer stops.
-8. **Result** – time or stage reached, leaderboard, Play again, auto-return after ~15 s.
+8. **Result** – time or stage reached, leaderboard, Restart (win or lose) back to registration for
+   the next player, auto-return after ~15 s.
 
 ## Rules carried over from the 2D game
 - Exactly 4 questions per run: easy, medium, hard, hardest. Pools of ~3, shuffled answers.
