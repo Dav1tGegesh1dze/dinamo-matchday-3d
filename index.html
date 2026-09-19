@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ka">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dinamo Road to Goal 3D</title>
+    <link rel="icon" href="data:," />
+    <style>
+      html, body { margin: 0; height: 100%; background: #000; overflow: hidden; user-select: none; }
+      canvas { display: block; }
+      #overlay {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        background: rgba(0, 0, 0, 0.55); color: #fff; font: bold 40px sans-serif; cursor: pointer;
+      }
+      #overlay[hidden] { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="overlay"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
