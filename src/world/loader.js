@@ -7,17 +7,6 @@ import { clone } from 'three/addons/utils/SkeletonUtils.js';
 // Until a real model exists, its name maps to a blockout placeholder here instead; adding the .glb
 // and deleting the placeholder changes no caller.
 const PLACEHOLDERS = {
-  shirt: () => box(0.5, 0.6, 0.08, 0x1450a0),
-  boots: () => {
-    const pair = new THREE.Group();
-    const left = box(0.12, 0.1, 0.28, 0x111111);
-    const right = left.clone();
-    left.position.x = -0.1;
-    right.position.x = 0.1;
-    pair.add(left, right);
-    return pair;
-  },
-  tape: () => new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.045, 8, 20), new THREE.MeshStandardMaterial({ color: 0xffffff })),
   ball: () => new THREE.Mesh(new THREE.IcosahedronGeometry(0.11, 2), new THREE.MeshStandardMaterial({ color: 0xffffff })),
   board: () => box(0.9, 0.55, 0.06, 0x111111),
   // A regulation goal (7.32 × 2.44 m) on the goal line, its mouth facing +x, with a see-through net.
