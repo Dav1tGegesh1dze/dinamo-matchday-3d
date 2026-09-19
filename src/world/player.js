@@ -1,16 +1,12 @@
 import * as THREE from 'three';
-import { createCharacter, KITS } from './character.js';
+import { createCharacter, turnTowards, KITS } from './character.js';
 
 const RADIUS = 0.35;
 const JOG_SPEED = 3;
 const SPRINT_SPEED = 5;
 const GRAVITY = 20;
-const STEP_HEIGHT = 0.5; // the floor raycast starts this far above the feet, so small steps are climbed
 const TURN_RATE = 12;
-// The Run clip's feet move at about 3.4 m/s; these playback speeds keep them from sliding.
-// (The Walk clip only looks right up to about 1.3 m/s, so it is not used for the player.)
-const JOG_CLIP_SPEED = JOG_SPEED / 3.4;
-const SPRINT_CLIP_SPEED = SPRINT_SPEED / 3.4;
+const STEP_HEIGHT = 0.5; // the floor raycast starts this far above the feet, so small steps are climbed
 
 const keys = new Set();
 window.addEventListener('keydown', (event) => keys.add(event.code));
@@ -28,7 +24,7 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
   model.position.copy(spawn);
   model.rotation.y = Math.PI;
   scene.add(model);
-  character.play('Idle');
+  character.moveAt(0);
   character.update(0);
 
   const down = new THREE.Raycaster();
@@ -47,16 +43,15 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
         // Camera forward on the ground is (-sin yaw, -cos yaw), camera right is (cos yaw, -sin yaw).
         const x = -Math.sin(yaw) * forward + Math.cos(yaw) * side;
         const z = -Math.cos(yaw) * forward - Math.sin(yaw) * side;
-        const speed = (sprinting ? SPRINT_SPEED : JOG_SPEED) / Math.hypot(x, z);
-        model.position.x += x * speed * dt;
-        model.position.z += z * speed * dt;
+        const speed = sprinting ? SPRINT_SPEED : JOG_SPEED;
+        model.position.x += (x / Math.hypot(x, z)) * speed * dt;
+        model.position.z += (z / Math.hypot(x, z)) * speed * dt;
         pushOutOfWalls(model.position, walls);
 
-        const turn = Math.atan2(x, z) - model.rotation.y;
-        model.rotation.y += Math.atan2(Math.sin(turn), Math.cos(turn)) * Math.min(1, TURN_RATE * dt);
-        character.play('Run', sprinting ? SPRINT_CLIP_SPEED : JOG_CLIP_SPEED);
+        turnTowards(model, x, z, TURN_RATE * dt);
+        character.moveAt(speed);
       } else {
-        character.play('Idle');
+        character.moveAt(0);
       }
       character.update(dt);
 

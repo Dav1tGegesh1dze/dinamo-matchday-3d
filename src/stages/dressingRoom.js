@@ -8,6 +8,7 @@ import { updateInteractions } from '../world/interact.js';
 import { showKit, lightKit, flash } from '../ui/hud.js';
 import { askQuestion } from '../ui/question.js';
 import { finishRun } from '../lib/run.js';
+import { tunnel } from './tunnel.js';
 import { t } from '../lib/i18n.js';
 
 // The 2D game's map at 1.25 m per tile, so its 2-tile corridors are 2.5 m wide. Top left is the
@@ -48,7 +49,7 @@ export const dressingRoom = {
   scene: new THREE.Scene(),
   camera: null,
 
-  async enter() {
+  async enter(go) {
     const layout = layoutFromGrid(MAP, TILE, WALL_HEIGHT);
     const level = buildLevel(this.scene, layout);
     this.player = await createPlayer(this.scene, level, layout.spots.P);
@@ -93,6 +94,7 @@ export const dressingRoom = {
         this.things.splice(this.things.indexOf(coachThing), 1);
         if (await askQuestion(1)) {
           flash(t('substitutedIn'));
+          go(tunnel);
         } else {
           finishRun(false);
           flash(t('stayOnBench'));
