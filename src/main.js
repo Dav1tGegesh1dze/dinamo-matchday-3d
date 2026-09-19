@@ -11,7 +11,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 document.body.append(renderer.domElement);
 
 const overlay = document.getElementById('overlay');
-overlay.textContent = t('clickToStart');
+overlay.textContent = t('clickToPlay');
 overlay.addEventListener('click', () => renderer.domElement.requestPointerLock());
 document.addEventListener('pointerlockchange', () => {
   overlay.hidden = document.pointerLockElement === renderer.domElement;

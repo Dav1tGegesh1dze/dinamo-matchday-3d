@@ -6,6 +6,8 @@ import { createCharacter } from '../world/character.js';
 import { loadModel } from '../world/loader.js';
 import { updateInteractions } from '../world/interact.js';
 import { showKit, lightKit, flash } from '../ui/hud.js';
+import { askQuestion } from '../ui/question.js';
+import { finishRun } from '../lib/run.js';
 import { t } from '../lib/i18n.js';
 
 // The 2D game's map at 1.25 m per tile, so its 2-tile corridors are 2.5 m wide. Top left is the
@@ -83,13 +85,21 @@ export const dressingRoom = {
     this.coach.play('Idle');
     this.scene.add(this.coach.object);
     level.walls.push(new THREE.Box3().setFromCenterAndSize(layout.spots.C, new THREE.Vector3(COACH_SIZE, 4, COACH_SIZE)));
-    this.things.push({
+    const coachThing = {
       position: this.coach.object.position,
       prompt: () => `E — ${t('talkToCoach')}`,
-      use: () => {
-        if (this.held.size < Object.keys(KIT).length) flash(t('kitFirst'));
+      use: async () => {
+        if (this.held.size < Object.keys(KIT).length) return flash(t('kitFirst'));
+        this.things.splice(this.things.indexOf(coachThing), 1);
+        if (await askQuestion(1)) {
+          flash(t('substitutedIn'));
+        } else {
+          finishRun(false);
+          flash(t('stayOnBench'));
+        }
       },
-    });
+    };
+    this.things.push(coachThing);
   },
 
   update(dt) {
