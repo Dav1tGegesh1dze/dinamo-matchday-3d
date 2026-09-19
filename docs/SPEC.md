@@ -432,7 +432,10 @@ the result follows 2.5 s later.
 ### 9. `feature/audio` — the 2D sounds in 3D
 
 Copy the `.wav` files. Footsteps, pickups, correct and wrong, whistle, tackle, save, goal, the crowd
-as positional audio at the tunnel mouth, and the dressing-room music loop.
+as positional audio at the tunnel mouth, and the dressing-room music loop. Footsteps play every 1.5 m jogged
+(one stride of the Run clip). In the dressing room the crowd comes from the coach at the tunnel mouth
+(full volume within 3 m, fading with distance); in the walk out it swells from 0.15 in the tunnel to
+0.5 on the pitch and plays until the result. Stages stop their sounds in `exit()`.
 
 - [ ] Every event that had a sound in the 2D game has it here
 - [ ] The crowd gets louder as you approach the tunnel mouth
