@@ -70,16 +70,18 @@ function plane([x0, z0, x1, z1], y, { material, tile }, facingUp) {
 }
 
 // Texture coordinates from world position in metres, so a texture keeps its real size on any
-// surface: floors and ceilings use x and z, walls use their length and the height.
+// surface: floors and ceilings use x and z, walls their length and the height, running to the
+// viewer's right on every wall so text on them is never mirrored.
 export function worldUvs(geometry, tile) {
   const position = geometry.attributes.position;
   const normal = geometry.attributes.normal;
   const uvs = [];
   for (let i = 0; i < position.count; i++) {
     const [x, y, z] = [position.getX(i), position.getY(i), position.getZ(i)];
-    if (Math.abs(normal.getY(i)) > 0.5) uvs.push(x / tile, z / tile);
-    else if (Math.abs(normal.getX(i)) > 0.5) uvs.push(z / tile, y / tile);
-    else uvs.push(x / tile, y / tile);
+    const [nx, ny, nz] = [normal.getX(i), normal.getY(i), normal.getZ(i)];
+    if (Math.abs(ny) > 0.5) uvs.push(x / tile, z / tile);
+    else if (Math.abs(nx) > 0.5) uvs.push((nx > 0 ? -z : z) / tile, y / tile);
+    else uvs.push((nz > 0 ? x : -x) / tile, y / tile);
   }
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 }

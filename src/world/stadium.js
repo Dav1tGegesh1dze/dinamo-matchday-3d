@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { loadTexture as texture } from './loader.js';
-import { worldUvs } from './level.js';
+import { worldUvs, solid, surface } from './level.js';
 
 // The Boris Paichadze Dinamo Arena, built from its real proportions (see docs/SPEC.md §10): an oval
 // two-tier bowl with a walkway ring between the tiers, a ring roof over the upper tier carried by
@@ -25,7 +25,7 @@ export function buildStadium(scene) {
   const roof = new THREE.MeshStandardMaterial({ color: 0xdadcdf, side: THREE.DoubleSide });
 
   scene.background = new THREE.Color(0x9cc4e8);
-  scene.add(new THREE.HemisphereLight(0xdfeeff, 0x4a5a3a, 1.4));
+  scene.add(new THREE.HemisphereLight(0xdfeeff, 0x6a6e66, 1.4));
   const sun = new THREE.DirectionalLight(0xfff4e0, 2.2);
   sun.position.set(-60, 120, 80);
   scene.add(sun);
@@ -49,7 +49,7 @@ export function buildStadium(scene) {
     pylons([139, 117], 40, concrete),
     boards(),
   );
-  return { walls: tunnel(scene, concrete) };
+  return { walls: tunnel(scene) };
 }
 
 // The pitch in 14 mown stripes on the apron that fills the bowl, both in the same grass texture.
@@ -200,24 +200,26 @@ function boards() {
   return faces;
 }
 
-// The players' tunnel under the main stand, opening onto the pitch on the halfway line. Returns
-// its walls and ceiling as boxes, so the follow camera stays inside it.
-function tunnel(scene, material) {
+// The players' tunnel under the main stand, opening onto the pitch on the halfway line: branded
+// Dinamo panels on the walls, ceiling tiles with strip lights down the middle, a rubber mat on the
+// floor. Returns its walls and ceiling as boxes, so the follow camera stays inside it.
+function tunnel(scene) {
   const { width, height, depth } = TUNNEL;
   const z = FRONT.b + depth / 2;
-  const boxes = [
+  const box = ([x, y, bz, w, h, d]) => new THREE.BoxGeometry(w, h, d).translate(x, y, bz);
+  const walls = [
     [-width / 2 - 0.25, height / 2, z, 0.5, height, depth],
     [width / 2 + 0.25, height / 2, z, 0.5, height, depth],
-    [0, height + 0.25, z, width + 1, 0.5, depth],
     [0, height / 2, FRONT.b + depth + 0.25, width + 1, height, 0.5],
   ];
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(width, depth).rotateX(-Math.PI / 2), material);
-  floor.position.set(0, 0.005, z);
-  scene.add(floor);
-  return boxes.map(([x, y, bz, w, h, d]) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-    mesh.position.set(x, y, bz);
-    scene.add(mesh);
-    return new THREE.Box3().setFromObject(mesh);
-  });
+  const roof = [0, height + 0.25, z, width + 1, 0.5, depth];
+  const floor = new THREE.PlaneGeometry(width, depth).rotateX(-Math.PI / 2).translate(0, 0.005, z);
+  const lights = [-4, 0, 4].map((dz) => box([0, height - 0.02, z + dz, 0.25, 0.04, 2]));
+  scene.add(
+    solid(walls.map(box), surface('tunnel-wall.png', 3)),
+    solid([box(roof)], surface('ceiling.jpg', 4.8)),
+    solid([floor], surface('rubber.png', 1)),
+    new THREE.Mesh(mergeGeometries(lights), new THREE.MeshBasicMaterial({ color: 0xf4f8ff })),
+  );
+  return [...walls, roof].map(([x, y, bz, w, h, d]) => new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, y, bz), new THREE.Vector3(w, h, d)));
 }
