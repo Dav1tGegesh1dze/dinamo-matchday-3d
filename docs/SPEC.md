@@ -466,8 +466,8 @@ Haven models are converted offline to `.glb` with 512 px WebP textures (about 0.
 The result screen's button becomes **Restart** (Enter too), for a win or a loss: it goes to the
 registration screen with empty fields, the same place the 15 s auto-return goes.
 
-- [ ] After a goal and after a loss, Restart shows an empty registration form
-- [ ] Enter on the result screen does the same
+- [x] After a goal and after a loss, Restart shows an empty registration form
+- [x] Enter on the result screen does the same
 
 ### 11. `feature/wear-kit` — kit you put on
 
