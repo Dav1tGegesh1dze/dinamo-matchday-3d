@@ -168,8 +168,10 @@ gain from doing it.
 **Movement.**
 - WASD or the arrow keys move the player **relative to the camera**, like GTA: W walks away from
   the camera. The character turns smoothly to face the direction of travel.
-- Shift jogs. Space and jumping are not used.
-- **Walk 3 m/s, jog 5 m/s.** The animation blends between `idle`, `walk` and `jog` based on speed.
+- Moving is a **jog at 3 m/s**; Shift **sprints at 5 m/s**, like GTA. Space and jumping are not used.
+- Standing still plays `Idle`; moving plays `Run`, sped up for the sprint so the feet don't slide,
+  with a 0.25 s cross-fade between them. The model's `Walk` clip only matches about 1.3 m/s, so
+  the player never uses it.
 
 **Pointer lock.** Browsers only allow it after a click, so the dressing room opens with a
 "Click to start" overlay. Escape releases the mouse and pauses; clicking resumes.
@@ -239,7 +241,7 @@ share one skeleton and the clips `Idle`, `Walk`, `Run`, `Jump`, `Clapping`, `Sta
 others. Materials are plain colours named `Shirt`, `Pants`, `Socks`, `Skin`, `Hair`, so a kit is a
 colour swap, not a new texture:
 - **Player:** the pack's man in T-shirt and shorts (`footballer.glb`), in the Dinamo home kit: blue
-  shirt, blue shorts, white socks. Clips: `Idle`, `Walk`, `Run` (jog), blended by speed.
+  shirt, blue shorts, white socks. Clips: `Idle` and `Run` (jog and sprint).
 - **Defenders:** the same footballer in plain red. **Goalkeeper:** the same footballer in green.
 - **Coach:** the pack's man in a suit (`coach.glb`). Clips: `Idle`, `Clapping`.
 
@@ -341,10 +343,10 @@ gravity and wall collision.
 ### 2. `feature/player-character` — a real footballer in the Dinamo kit
 
 Replace the capsule with the Animated Men Pack footballer (§9), loaded as a `.glb` through
-`loader.js`, coloured in the Dinamo home kit, with `Idle`, `Walk` and `Run` blended by speed.
+`loader.js`, coloured in the Dinamo home kit, with `Idle` and `Run` cross-faded.
 
 - [ ] The player is a person in a blue shirt, blue shorts and white socks, not a capsule
-- [ ] Standing still plays idle, walking plays walk, Shift plays run, and changes blend smoothly
+- [ ] Standing still plays idle, moving plays run (faster when sprinting), and changes blend smoothly
 - [ ] Collision and the camera behave exactly as before
 - [ ] Still 60 fps
 

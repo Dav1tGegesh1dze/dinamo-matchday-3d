@@ -1,12 +1,17 @@
 import * as THREE from 'three';
-import { loadModel } from './loader.js';
+import { createCharacter, KITS } from './character.js';
 
 const RADIUS = 0.35;
-const WALK_SPEED = 3;
-const JOG_SPEED = 5;
+const JOG_SPEED = 3;
+const SPRINT_SPEED = 5;
 const GRAVITY = 20;
 const STEP_HEIGHT = 0.5; // the floor raycast starts this far above the feet, so small steps are climbed
 const TURN_RATE = 12;
+const MODEL_SCALE = 0.374; // the footballer model is 4.81 units tall; this makes him 1.8 m
+// The Run clip's feet move at about 3.4 m/s; these playback speeds keep them from sliding.
+// (The Walk clip only looks right up to about 1.3 m/s, so it is not used for the player.)
+const JOG_CLIP_SPEED = JOG_SPEED / 3.4;
+const SPRINT_CLIP_SPEED = SPRINT_SPEED / 3.4;
 
 const keys = new Set();
 window.addEventListener('keydown', (event) => keys.add(event.code));
@@ -16,13 +21,16 @@ function axis(positive, negative) {
   return (positive.some((code) => keys.has(code)) ? 1 : 0) - (negative.some((code) => keys.has(code)) ? 1 : 0);
 }
 
-// The player: a capsule that walks relative to the camera, turns to face where it goes,
-// slides along walls and stays on the floor.
+// The player: a footballer in the Dinamo kit who jogs relative to the camera, turns to face where
+// he goes, slides along walls (as a capsule) and stays on the floor.
 export async function createPlayer(scene, { floors, walls }, spawn) {
-  const model = await loadModel('player');
+  const character = await createCharacter('footballer', KITS.dinamo, MODEL_SCALE);
+  const model = character.object;
   model.position.copy(spawn);
   model.rotation.y = Math.PI;
   scene.add(model);
+  character.play('Idle');
+  character.update(0);
 
   const down = new THREE.Raycaster();
   const rayOrigin = new THREE.Vector3();
@@ -35,18 +43,23 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
     update(dt, yaw) {
       const forward = axis(['KeyW', 'ArrowUp'], ['KeyS', 'ArrowDown']);
       const side = axis(['KeyD', 'ArrowRight'], ['KeyA', 'ArrowLeft']);
+      const sprinting = keys.has('ShiftLeft') || keys.has('ShiftRight');
       if (forward || side) {
         // Camera forward on the ground is (-sin yaw, -cos yaw), camera right is (cos yaw, -sin yaw).
         const x = -Math.sin(yaw) * forward + Math.cos(yaw) * side;
         const z = -Math.cos(yaw) * forward - Math.sin(yaw) * side;
-        const speed = (keys.has('ShiftLeft') || keys.has('ShiftRight') ? JOG_SPEED : WALK_SPEED) / Math.hypot(x, z);
+        const speed = (sprinting ? SPRINT_SPEED : JOG_SPEED) / Math.hypot(x, z);
         model.position.x += x * speed * dt;
         model.position.z += z * speed * dt;
         pushOutOfWalls(model.position, walls);
 
         const turn = Math.atan2(x, z) - model.rotation.y;
         model.rotation.y += Math.atan2(Math.sin(turn), Math.cos(turn)) * Math.min(1, TURN_RATE * dt);
+        character.play('Run', sprinting ? SPRINT_CLIP_SPEED : JOG_CLIP_SPEED);
+      } else {
+        character.play('Idle');
       }
+      character.update(dt);
 
       fallSpeed += GRAVITY * dt;
       model.position.y -= fallSpeed * dt;

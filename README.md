@@ -12,3 +12,9 @@ Walk the dressing room, find your kit, answer the coach, and score.
 npm install
 npm run dev
 ```
+
+## Asset credits
+
+All CC0 (public domain), no attribution required, listed for reference:
+
+- `public/assets/models/footballer.glb`: Quaternius, *Animated Men Pack*, via [poly.pizza](https://poly.pizza/m/HMnuH5geEG)
