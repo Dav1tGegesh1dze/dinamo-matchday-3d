@@ -269,7 +269,8 @@ Walking out of the tunnel must feel like walking out at Dinamo Tbilisi's home gr
   wide apron between the touchlines and the first row, widest behind the goals.
 
 **Assumptions to confirm with the developer** (not in any source found): blue seats, and
-floodlights mounted along the front edge of the roof.
+floodlights mounted along the front edge of the roof. The match is played at night (Phase 3): a starry sky, floodlights
+glowing along the roof edge, a bright pitch.
 
 **How it is built.** No free model of the Dinamo Arena exists, so `world/stadium.js` builds it from
 the numbers above: the pitch, the apron, a lower tier, the terrace ring, an upper tier, the roof ring
@@ -571,8 +572,8 @@ model's own shirt and boots.
 A night sky, floodlights that glow with bloom, a bright pitch under darker stands, cleaner stylized
 grass with strong mowing stripes, and LED advertising boards that light up.
 
-- [ ] The walk out is a night match: dark sky, glowing floodlights, a bright pitch
-- [ ] The stadium still reads as the Dinamo Arena (§10)
+- [x] The walk out is a night match: dark sky, glowing floodlights, a bright pitch
+- [x] The stadium still reads as the Dinamo Arena (§10)
 
 ### 18. `feature/living-crowd` — fans who move
 

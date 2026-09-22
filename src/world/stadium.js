@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { loadTexture as texture } from './loader.js';
 import { worldUvs, solid, surface } from './level.js';
-import { keyLight, shadows, GLOW } from './graphics.js';
+import { keyLight, shadows, loadSky, loadEnvironment, GLOW } from './graphics.js';
 
 // The Boris Paichadze Dinamo Arena, built from its real proportions (see docs/SPEC.md §10): an oval
 // two-tier bowl with a walkway ring between the tiers, a ring roof over the upper tier carried by
@@ -19,16 +19,28 @@ const FLOODLIGHTS = 120;
 const GRASS_TILE = 4; // metres covered by one repeat of the grass texture
 const SEAT_TILE = { along: 8, up: 6.4 }; // one seats.png tile is 16 seats × 8 rows
 const BOARD = { height: 0.9, length: 14.4, gap: 4 }; // boards.png is 16:1; a gap in front of the tunnel
+// A night match: a starry sky, a faint haze over the far stands, and the floodlights doing the work.
+const NIGHT = { sky: 0.35, environment: 0.3, haze: 0.0022, hazeColour: 0x0a0f1e };
+const FLOODLIGHT_BANKS = [[1, 1], [-1, 1], [1, -1], [-1, -1]]; // light the pitch from all four corners
 
-export function buildStadium(scene) {
+export async function buildStadium(scene) {
   const grass = texture('grass.jpg');
-  const seats = new THREE.MeshStandardMaterial({ map: texture('seats.png', 16), side: THREE.DoubleSide });
-  const concrete = new THREE.MeshStandardMaterial({ color: 0xb9b5ad, side: THREE.DoubleSide });
-  const roof = new THREE.MeshStandardMaterial({ color: 0xdadcdf, side: THREE.DoubleSide });
+  const seats = new THREE.MeshStandardMaterial({ map: texture('seats.png', 16), color: 0x9095a0, side: THREE.DoubleSide });
+  const concrete = new THREE.MeshStandardMaterial({ color: 0x77746f, side: THREE.DoubleSide });
+  const roof = new THREE.MeshStandardMaterial({ color: 0x9a9da3, side: THREE.DoubleSide });
 
-  scene.background = new THREE.Color(0x9cc4e8);
-  scene.add(new THREE.HemisphereLight(0xdfeeff, 0x6a6e66, 0.9));
-  const key = keyLight(scene, { colour: 0xfff4e0, intensity: 2.4, offset: new THREE.Vector3(-12, 30, 16), reach: 16 });
+  scene.background = await loadSky('night');
+  scene.backgroundIntensity = NIGHT.sky;
+  scene.environment = await loadEnvironment('night');
+  scene.environmentIntensity = NIGHT.environment;
+  scene.fog = new THREE.FogExp2(NIGHT.hazeColour, NIGHT.haze);
+  scene.add(new THREE.HemisphereLight(0x3a4a7a, 0x10160e, 0.3));
+  for (const [x, z] of FLOODLIGHT_BANKS) {
+    const bank = new THREE.DirectionalLight(0xe8f0ff, 0.4);
+    bank.position.set(x * 80, 60, z * 60);
+    scene.add(bank);
+  }
+  const key = keyLight(scene, { colour: 0xf2f6ff, intensity: 2.6, offset: new THREE.Vector3(-6, 34, 10), reach: 16 });
 
   const field = pitch(grass);
   field.receiveShadow = true;
@@ -59,7 +71,7 @@ function pitch(grass) {
   const apron = new THREE.CircleGeometry(1, SEGMENTS).rotateX(-Math.PI / 2).scale(FRONT.a, 1, FRONT.b).toNonIndexed();
   const field = new THREE.PlaneGeometry(PITCH.length, PITCH.width, 14, 1).rotateX(-Math.PI / 2).translate(0, 0.01, 0).toNonIndexed();
   paint(apron, () => 0.72);
-  paint(field, (x) => (Math.floor((x + PITCH.length / 2) / (PITCH.length / 14)) % 2 ? 0.86 : 1));
+  paint(field, (x) => (Math.floor((x + PITCH.length / 2) / (PITCH.length / 14)) % 2 ? 0.78 : 1));
   const geometry = mergeGeometries([apron, field]);
   worldUvs(geometry, GRASS_TILE);
   return new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: grass, vertexColors: true }));
@@ -145,7 +157,7 @@ function seatRepeat([a0, b0, y0], [a1, b1, y1]) {
 
 function floodlights([a, b, y]) {
   const lamps = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(1.6, 0.7, 0.3),
+    new THREE.BoxGeometry(2.4, 1.1, 0.3),
     new THREE.MeshBasicMaterial({ color: new THREE.Color(0xfffbe8).multiplyScalar(GLOW) }),
     FLOODLIGHTS,
   );
@@ -196,7 +208,7 @@ function boards() {
   );
   const faces = new THREE.Group();
   faces.add(
-    new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture('boards.png') })),
+    new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture('boards.png'), emissiveMap: texture('boards.png'), emissive: 0xffffff, emissiveIntensity: 0.9 })), // lit like LED screens
     new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x1b1d22, side: THREE.BackSide })),
   );
   return faces;
