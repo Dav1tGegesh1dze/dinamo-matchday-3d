@@ -33,6 +33,8 @@ const SHOT = { seconds: 0.7, height: 1.2 };
 const TOP_CORNER = new THREE.Vector3(53, 2.1, -2.9);
 const SAVE_AT = new THREE.Vector3(51.1, 0.5, 3); // the ball in the keeper's hands at the end of his dive
 const DIVE = { seconds: 0.5, sideways: 1.4, lean: 1.3 };
+// How the crowd feels (excitement, camera flashes): watching the duels, a goal, a chance lost.
+const MOOD = { play: [0.35, 0.15], goal: [1, 0.6], lost: [0.05, 0] };
 
 // The opponents stand in position from the start of the walk out.
 export async function addOpponents(scene) {
@@ -58,6 +60,7 @@ export const pitch = {
     this.scene = tunnel.scene;
     this.camera = tunnel.camera;
     this.action = null;
+    tunnel.fans.excite(...MOOD.play);
     this.play();
   },
 
@@ -76,6 +79,7 @@ export const pitch = {
     tunnel.follow.driftBehind(dt);
     tunnel.follow.update(dt);
     tunnel.key.follow(tunnel.player.object.position);
+    tunnel.fans.update(dt);
   },
 
   // Runs `step(dt, seconds so far)` every frame until it returns true.
@@ -182,6 +186,7 @@ export const pitch = {
       return progress === 1;
     });
     finishRun(false);
+    tunnel.fans.excite(...MOOD.lost);
     flash(t('tackled'));
     this.end();
   },
@@ -192,6 +197,7 @@ export const pitch = {
     finishRun(true);
     await this.shoot(keeper, TOP_CORNER);
     tunnel.player.play('celebrate');
+    tunnel.fans.excite(...MOOD.goal);
     playSound('goal');
     flash(t('goal'));
     this.end();
@@ -203,6 +209,7 @@ export const pitch = {
     await this.shoot(keeper, SAVE_AT);
     tunnel.player.moveAt(0);
     playSound('save');
+    tunnel.fans.excite(...MOOD.lost);
     flash(t('saved'));
     this.end();
   },

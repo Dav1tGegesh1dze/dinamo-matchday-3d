@@ -3,12 +3,14 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { loadTexture as texture } from './loader.js';
 import { worldUvs, solid, surface } from './level.js';
 import { keyLight, shadows, loadSky, loadEnvironment, GLOW } from './graphics.js';
+import { createCrowd } from './crowd.js';
 
 // The Boris Paichadze Dinamo Arena, built from its real proportions (see docs/SPEC.md §10): an oval
 // two-tier bowl with a walkway ring between the tiers, a ring roof over the upper tier carried by
 // 58 pylons, and a 105 × 68 m pitch. The pitch's long axis is x; the main stand, with the players'
 // tunnel on the halfway line, is on the +z side. Every surface takes its look from a texture file.
-// buildStadium returns the tunnel's walls, for the camera, and the key light to keep over the player.
+// buildStadium returns the tunnel's walls, for the camera, the key light to keep over the player,
+// and the crowd.
 
 const SEGMENTS = 256;
 const PITCH = { length: 105, width: 68 };
@@ -47,12 +49,14 @@ export async function buildStadium(scene) {
   scene.add(field, markings());
 
   // The bowl, from the front wall up to the roof. [a, b, y] is an ellipse at a height.
+  const lowBottom = [FRONT.a, FRONT.b, TUNNEL.height];
   const lowTop = [104, 82, 13];
   const upBottom = [107, 85, 14.5];
   const upTop = [135, 113, 32];
+  const crowd = createCrowd([[lowBottom, lowTop], [upBottom, upTop]]);
   scene.add(
-    ring([FRONT.a, FRONT.b, 0], [FRONT.a, FRONT.b, TUNNEL.height], concrete, [1, 1], aroundTunnel()),
-    ring([FRONT.a, FRONT.b, TUNNEL.height], lowTop, seats, seatRepeat([FRONT.a, FRONT.b, TUNNEL.height], lowTop)),
+    ring([FRONT.a, FRONT.b, 0], lowBottom, concrete, [1, 1], aroundTunnel()),
+    ring(lowBottom, lowTop, seats, seatRepeat(lowBottom, lowTop)),
     ring(lowTop, [107, 85, 13], concrete), // the walkway ring between the tiers
     ring([107, 85, 13], upBottom, concrete),
     ring(upBottom, upTop, seats, seatRepeat(upBottom, upTop)),
@@ -62,8 +66,9 @@ export async function buildStadium(scene) {
     floodlights([110, 88, 36.2]),
     pylons([139, 117], 40, concrete),
     boards(),
+    crowd.object,
   );
-  return { walls: tunnel(scene), key };
+  return { walls: tunnel(scene), key, crowd };
 }
 
 // The pitch in 14 mown stripes on the apron that fills the bowl, both in the same grass texture.
