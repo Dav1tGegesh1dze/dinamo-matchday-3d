@@ -15,7 +15,8 @@ graphics. One laptop with mouse and keyboard, one player at a time, about 3 minu
 2. **Dressing room (third person)** – find your shirt and boots, then the tape in the physio room,
    then the coach at the tunnel mouth. Mouse orbits the camera, WASD walks relative to it.
 3. **Question 1 (easy)** – the coach asks. Correct → substituted in. Wrong → game over.
-4. **Tunnel walk (automatic)** – walk out into the stadium, substitution board, receive the ball.
+4. **Run out** – run from the tunnel to the centre circle yourself, following the marker; the
+   substitution board shows your name as you pass; the team-mate's pass arrives at your feet.
 5. **Defender 1** – Question 2 (medium). Correct → go past. Wrong → tackled → game over.
 6. **Defender 2** – Question 3 (hard).
 7. **Goalkeeper** – one-on-one, Question 4 (hardest). Correct → GOAL, timer stops.

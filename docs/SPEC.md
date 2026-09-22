@@ -99,7 +99,7 @@ need a whole new toolchain and share no code with the 2D game.
 index.html
 vite.config.js
 package.json
-electron/main.cjs    # copied from the 2D game (roadmap item 20)
+electron/main.cjs    # copied from the 2D game (roadmap item 22)
 public/assets/
   models/            # .glb rooms, props, characters
   textures/          # floor, wall, pitch images
@@ -108,7 +108,7 @@ src/
   main.js            # renderer, resize, the stage controller
   stages/
     dressingRoom.js  # the walkable level
-    tunnel.js        # scripted walk out to the pitch
+    tunnel.js        # the run out from the tunnel to the centre circle
     pitch.js         # defenders, keeper, the goal
   world/
     loader.js        # loads and caches .glb models
@@ -141,7 +141,7 @@ controller**: one renderer, one canvas, one animation loop. Each stage is an obj
 stage.
 
 ```
-registration (HTML) → dressing room (3D) → question 1 → tunnel walk (3D)
+registration (HTML) → dressing room (3D) → question 1 → run out (3D)
 → pitch (3D) → questions 2–4 → result (HTML) → registration
 ```
 
@@ -295,14 +295,18 @@ under a ring roof. Not a photographic replica.
 | Item | Budget |
 |------|--------|
 | Frame rate | 60 fps at 1280×720, never below 30 |
+| Frame time on the developer's Mac | under 6 ms at 1920×1080 at the top quality level (item 20) |
+| Shader compiling | before a stage is shown, never during play (item 20) |
+| Post-processing | bloom only, the first thing the automatic quality drops (item 20 removed ambient occlusion) |
 | Draw calls per frame | under 150 for the scene itself; shadow and post-processing passes come on top, and the automatic quality levels (item 15) trim them on slower machines |
 | Triangles on screen | under 300k |
 | Animated characters on screen | at most 4 (player + coach, or player + 3 opponents) |
 | Real-time lights | 1 directional + ambient; everything else baked |
-| Shadow maps | 1, 1024 px, only near the player |
+| Shadow maps | 1, 2048 px, only near the player |
 | Total downloaded assets | under 40 MB |
 
-`devicePixelRatio` is capped at 1.5, so a retina screen does not quadruple the work.
+`devicePixelRatio` is capped at 1.5, so a retina screen does not quadruple the work. The lowest
+quality level renders at 0.75 of the screen's pixels.
 
 ---
 
@@ -400,7 +404,7 @@ it drifts back behind the player. The ball and goals are blockout placeholders i
 (no CC0 football model was found yet).
 
 - [ ] Walking out shows an oval two-tier bowl under a ring roof, with blue seats, a striped pitch and `DINAMO TBILISI` boards
-- [ ] The walk out plays by itself after question 1 is answered correctly
+- [ ] The walk out plays by itself after question 1 is answered correctly (replaced in item 21: the player runs out himself)
 - [ ] The substitution board shows the registered name
 - [ ] Still 60 fps with the whole bowl in view
 
@@ -552,7 +556,7 @@ and anti-aliasing. **Automatic quality:** the game measures its frame rate in th
 a stage and steps down (ambient occlusion off, then bloom and shadows off, then a lower pixel
 ratio) until it holds about 60 fps.
 
-- [x] Characters and furniture cast soft shadows; corners and contact points darken (ambient occlusion)
+- [x] Characters and furniture cast soft shadows; corners and contact points darken (ambient occlusion; removed in item 20, it cost half of every frame)
 - [x] Colours are filmic, not flat; bright lights glow
 - [x] On a weak machine the quality steps down by itself and the frame rate recovers
 
@@ -592,7 +596,68 @@ photograph pasted next to a stylized character.
 
 - [x] Floors, walls and props share one clean palette with the characters
 
-### 20. `feature/stand-mode` — kiosk and downloads
+## Phase 4: smooth on any laptop, and you run out yourself (items 20–21)
+
+The developer played the game on a strong Mac (M1 Max, a 1920×1080 screen at 100 Hz) and reported:
+1. **It lags**, even there, so a weaker stand laptop would be worse.
+2. **The automatic walk to the centre circle takes too long** (about 36 s of watching). The player
+   should run it himself and be shown where to go.
+
+**Measured** (headless Chrome on that Mac at 1920×1080, a full run logged frame by frame):
+- A frame took about 10.6 ms at the top quality level. At 100 Hz the budget is 10 ms, so the game
+  kept missing frames and fell to 50 fps with judder. The automatic quality did not react, because
+  it only stepped down below 50 fps.
+- **Ambient occlusion was half of every frame** (about 5 ms, mostly processor time): it draws the
+  whole scene a second time and adds three more passes. Without it a frame takes 4.5–5.7 ms.
+- **Freezes of 150–450 ms** whenever something was seen for the first time: walking into another
+  room, reaching the coach, a few seconds into the walk out. three.js compiles a material's shader
+  the first time the material is drawn.
+- Every body part of every person had its own copy of the same skeleton, so at the pitch about 500
+  of the 2,000 graphics calls in each frame uploaded the same bones again.
+
+**What successful games do:**
+- **Nothing compiles during play.** Engines prepare their shaders while loading (Unreal's shader and
+  pipeline caches, Unity's shader warm-up). three.js has `compileAsync`, which compiles in the
+  background before a scene is first drawn.
+- **Quality fits the machine** and is chosen automatically. Expensive screen effects such as ambient
+  occlusion are the first thing low settings turn off.
+- **The player stays in control.** Long sequences you can only watch are a well-known frustration;
+  walking sections should be played, not watched.
+- **Where to go is always shown.** GTA marks the destination (a checkpoint "corona", the route on
+  the radar) and states the objective in words. Modern games add a marker with the distance, which
+  sticks to the screen edge with an arrow when the target is off screen or behind you.
+
+### 20. `feature/smooth-frames` — no lag, no freezes
+
+Ambient occlusion is removed; bloom, shadows, filmic colour and the HDR light stay. Each stage's
+shaders are compiled in the background before the stage is shown, so nothing compiles during
+play. The post-processing is built once, not once per stage. A person's body parts share one
+skeleton. The HDR skies are prepared while the registration screen is up. The automatic quality
+aims at 55 fps and steps down: bloom and shadows → shadows → neither → neither at 0.75 pixel ratio.
+
+- [ ] At 1920×1080 on the developer's Mac a frame costs under 6 ms at the top level (it was 10.6 ms)
+- [ ] No frame over 100 ms while playing: in the rooms, at the coach, in the walk out and the duels (only the change of stage itself)
+- [ ] With the processor slowed down 4×, the quality steps down and the frame rate recovers
+- [ ] The look is unchanged apart from the ambient occlusion
+
+### 21. `feature/run-out` — run out to the centre circle yourself
+
+After question 1 the player starts in the tunnel and runs out himself, with the dressing room's
+controls: WASD, Shift to sprint, the mouse turns the camera. The top of the screen says what to do
+("Run to the centre circle", with "Shift: sprint"), and a marker with the distance stands over the
+kick-off spot. When the spot is off screen or behind the player, the marker sticks to the screen
+edge with an arrow pointing the way. The fourth official stands in the gap in the boards in front
+of the tunnel, and his board shows `▲ <name>` as the player passes. The boards, the bowl's front
+wall, the goals and the people are solid. On reaching the kick-off spot the player settles on it
+facing the goal and the team-mate's pass arrives, as before.
+
+- [ ] After question 1 the player runs out himself; nothing walks him
+- [ ] The objective and the marker show where to go, also when he faces away
+- [ ] The substitution board shows his name as he passes
+- [ ] Sprinting, the run out takes about 12 s (the walk out took 36 s)
+- [ ] He cannot leave the pitch area or walk through the boards, the goals or people
+
+### 22. `feature/stand-mode` — kiosk and downloads
 
 Fullscreen on Start, no right-click, pixel-ratio cap, offline check. Copy `electron/main.cjs` and
 `release.yml` from the 2D repo so GitHub Actions builds the Mac and Windows apps and publishes them
