@@ -29,3 +29,4 @@ Listed for reference. Everything is CC0 (public domain) unless noted:
 - `public/assets/textures/tunnel-wall.png`, `rubber.png`: drawn for this project (Noto fonts, SIL Open Font License)
 - `public/assets/env/studio.hdr`: Poly Haven, *Brown Photostudio 02* HDRI ([polyhaven.com](https://polyhaven.com/a/brown_photostudio_02)), 1k
 - `public/assets/env/night.hdr`: Poly Haven, *Kloppenheim 02* HDRI ([polyhaven.com](https://polyhaven.com/a/kloppenheim_02)), 2k
+- `public/assets/textures/fans.png`: rendered for this project from `footballer.glb` (8 fans, arms down and up), with scarves drawn on

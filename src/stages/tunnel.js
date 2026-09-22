@@ -28,6 +28,7 @@ const ATTACK = [1, 0]; // the player attacks the goal at +x
 const PASS = { from: new THREE.Vector3(-16, 0.11, -14), seconds: 1.6 };
 const TEAMMATE = new THREE.Vector3(-16.6, 0, -14.4); // stands just behind the ball he passes
 const TURN_RATE = 8;
+const FANS = { walkOut: 0.5, flashes: 1 }; // the crowd is up for the walk out, cameras flashing
 // The crowd swells from muffled in the tunnel to full on the pitch.
 const CROWD = { inTunnel: 0.15, onPitch: 0.5, pitchZ: 40, tunnelZ: 58 }; // volumes, and where the swell starts and ends
 
@@ -40,8 +41,10 @@ export const tunnel = {
     this.scene = new THREE.Scene();
     showKit([]);
     showPrompt(null);
-    const { walls, key } = await buildStadium(this.scene);
+    const { walls, key, crowd } = await buildStadium(this.scene);
     this.key = key;
+    this.fans = crowd;
+    this.fans.excite(FANS.walkOut, FANS.flashes);
 
     for (const side of [-1, 1]) {
       const goal = shadows((await loadModel('goal')).scene);
@@ -114,6 +117,7 @@ export const tunnel = {
 
     this.follow.driftBehind(dt);
     this.key.follow(model.position);
+    this.fans.update(dt);
     const inside = THREE.MathUtils.smoothstep(model.position.z, CROWD.pitchZ, CROWD.tunnelZ);
     this.crowd.setVolume(THREE.MathUtils.lerp(CROWD.onPitch, CROWD.inTunnel, inside));
     this.player.update(dt);

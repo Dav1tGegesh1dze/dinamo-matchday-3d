@@ -581,9 +581,9 @@ Thousands of fans drawn in bulk (instanced billboards from a sprite sheet made f
 model) in Dinamo blue and white, bouncing and waving at their own rhythm, a few scarves held up, and
 camera flashes during the walk out. They jump on a goal.
 
-- [ ] The stands are full of moving fans, not a still picture
-- [ ] Camera flashes spark during the walk out; the crowd jumps on a goal
-- [ ] Still 60 fps at the top quality level with the whole bowl in view
+- [x] The stands are full of moving fans, not a still picture
+- [x] Camera flashes spark during the walk out; the crowd jumps on a goal
+- [x] Still 60 fps at the top quality level with the whole bowl in view
 
 ### 19. `feature/stylized-rooms` — the rooms match the new look
 
