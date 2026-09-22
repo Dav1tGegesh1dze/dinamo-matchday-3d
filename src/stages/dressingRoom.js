@@ -77,6 +77,7 @@ const LOOK = {
 const WOOD = surface('wood.jpg', 1.2);
 const SIGNS = new THREE.MeshStandardMaterial({ map: loadTexture('signs.png') });
 const SIGN_HEIGHT = 2.72; // hangs above where the camera usually is
+const ENVIRONMENT = loadEnvironment('studio'); // prepared while the registration screen is up
 const ENVIRONMENT_INTENSITY = 0.8;
 const GLOW = { strength: 0.6, speed: 3 }; // kit still to find pulses brighter in its own colour, to catch the eye
 const COACH_SIZE = 0.6; // the coach blocks the player like a 0.6 m wall box
@@ -89,7 +90,7 @@ export const dressingRoom = {
 
   async enter(go, end) {
     this.scene = new THREE.Scene();
-    this.scene.environment = await loadEnvironment('studio');
+    this.scene.environment = await ENVIRONMENT;
     this.scene.environmentIntensity = ENVIRONMENT_INTENSITY;
     const layout = layoutFromGrid(MAP, TILE, WALL_HEIGHT);
     const level = buildLevel(this.scene, layout, LOOK);

@@ -634,11 +634,14 @@ shaders are compiled in the background before the stage is shown, so nothing com
 play. The post-processing is built once, not once per stage. A person's body parts share one
 skeleton. The HDR skies are prepared while the registration screen is up. The automatic quality
 aims at 55 fps and steps down: bloom and shadows → shadows → neither → neither at 0.75 pixel ratio.
+When a run ends, its scenes are released from the graphics card: they used to pile up run after
+run, which a stand playing all day could not afford.
 
-- [ ] At 1920×1080 on the developer's Mac a frame costs under 6 ms at the top level (it was 10.6 ms)
-- [ ] No frame over 100 ms while playing: in the rooms, at the coach, in the walk out and the duels (only the change of stage itself)
-- [ ] With the processor slowed down 4×, the quality steps down and the frame rate recovers
-- [ ] The look is unchanged apart from the ambient occlusion
+- [x] At 1920×1080 on the developer's Mac a frame costs under 6 ms at the top level (it was 10.6 ms)
+- [x] No frame over 100 ms while playing: in the rooms, at the coach, in the walk out and the duels (only the change of stage itself)
+- [x] With the processor slowed down 8× the top level still holds 60 fps; slowed down 20×, the quality steps down and the frame rate recovers
+- [x] The look is unchanged apart from the ambient occlusion
+- [x] Memory stays flat run after run
 
 ### 21. `feature/run-out` — run out to the centre circle yourself
 

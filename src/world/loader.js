@@ -36,9 +36,21 @@ const textureLoader = new THREE.TextureLoader();
 
 export async function loadModel(name) {
   if (PLACEHOLDERS[name]) return { scene: PLACEHOLDERS[name](), animations: [] };
-  if (!cache.has(name)) cache.set(name, gltfLoader.loadAsync(`assets/models/${name}.glb`));
+  if (!cache.has(name)) cache.set(name, gltfLoader.loadAsync(`assets/models/${name}.glb`).then(boundSkins));
   const gltf = await cache.get(name);
   return { scene: clone(gltf.scene), animations: gltf.animations };
+}
+
+// A skinned part works out its bounds from its posed vertices the first time it is drawn, a few
+// milliseconds each. Done once here on the loaded original, every copy inherits them.
+function boundSkins(gltf) {
+  gltf.scene.updateMatrixWorld(true);
+  gltf.scene.traverse((node) => {
+    if (!node.isSkinnedMesh) return;
+    node.skeleton.update();
+    node.computeBoundingSphere();
+  });
+  return gltf;
 }
 
 // A repeating colour texture from public/assets/textures/<name>.

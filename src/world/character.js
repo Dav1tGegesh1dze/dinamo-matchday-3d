@@ -41,6 +41,7 @@ export async function createCharacter(kit) {
   const { scene } = await loadModel('footballer');
   const { animations } = await loadModel('animations');
   dress(scene, kit);
+  shareSkeleton(scene);
 
   const mixer = new THREE.AnimationMixer(scene);
   const actions = Object.fromEntries(
@@ -106,6 +107,16 @@ export async function kitPiece(part, colour) {
     if (node.isMesh) node.visible = node.material.name === part;
   });
   return scene;
+}
+
+// footballer.glb's parts (body, hair, eyes, eyebrows) all follow its one skin, but the loader gives
+// each part its own copy of the skeleton. With one shared skeleton the bones are worked out and sent
+// to the graphics card once a frame instead of once per part.
+function shareSkeleton(scene) {
+  let skeleton = null;
+  scene.traverse((node) => {
+    if (node.isSkinnedMesh) node.skeleton = skeleton ??= node.skeleton;
+  });
 }
 
 function dress(scene, kit) {

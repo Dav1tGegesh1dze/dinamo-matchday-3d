@@ -23,6 +23,7 @@ const SEAT_TILE = { along: 8, up: 6.4 }; // one seats.png tile is 16 seats × 8 
 const BOARD = { height: 0.9, length: 14.4, gap: 4 }; // boards.png is 16:1; a gap in front of the tunnel
 // A night match: a starry sky, a faint haze over the far stands, and the floodlights doing the work.
 const NIGHT = { sky: 0.35, environment: 0.3, haze: 0.0022, hazeColour: 0x0a0f1e };
+const SKY = { image: loadSky('night'), light: loadEnvironment('night') }; // prepared while the registration screen is up
 const FLOODLIGHT_BANKS = [[1, 1], [-1, 1], [1, -1], [-1, -1]]; // light the pitch from all four corners
 
 export async function buildStadium(scene) {
@@ -31,9 +32,9 @@ export async function buildStadium(scene) {
   const concrete = new THREE.MeshStandardMaterial({ color: 0x77746f, side: THREE.DoubleSide });
   const roof = new THREE.MeshStandardMaterial({ color: 0x9a9da3, side: THREE.DoubleSide });
 
-  scene.background = await loadSky('night');
+  scene.background = await SKY.image;
   scene.backgroundIntensity = NIGHT.sky;
-  scene.environment = await loadEnvironment('night');
+  scene.environment = await SKY.light;
   scene.environmentIntensity = NIGHT.environment;
   scene.fog = new THREE.FogExp2(NIGHT.hazeColour, NIGHT.haze);
   scene.add(new THREE.HemisphereLight(0x3a4a7a, 0x10160e, 0.3));

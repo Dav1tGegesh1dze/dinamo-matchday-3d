@@ -5,13 +5,15 @@ import { showRegistration } from './ui/registration.js';
 import { showResult } from './ui/result.js';
 import { showTimer } from './ui/hud.js';
 import { play as playSound, unlockAudio } from './world/audio.js';
-import { renderer, render, resize as resizeView } from './world/graphics.js';
+import { renderer, render, prepare, release, resize as resizeView } from './world/graphics.js';
 
 // Game flow: registration → dressing room → tunnel → pitch → result → registration for the next player.
 // Stage controller: one renderer, one canvas, one loop. The active stage owns its scene and camera,
 // and it only updates while the mouse is locked, so Escape pauses the game. A stage moves on with
 // go(next stage), which keeps the old one drawing until the next is ready, and calls end() when the
-// run is over. A stage may have exit(), called when it stops being shown (it stops its sounds).
+// run is over. A stage may have exit(), called when it stops being shown (it stops its sounds). A
+// new stage is prepared before it is shown (see prepare), so playing it never stutters. When a run
+// ends, its scenes are released from the graphics card.
 const MAX_STEP = 0.05;
 const RESULT_DELAY_MS = 2500; // time to read "GOAL!" or "Tackled!" before the result screen
 
@@ -24,12 +26,15 @@ document.addEventListener('pointerlockchange', () => {
 });
 
 let stage = null;
+const scenes = new Set(); // the current run's scenes
 
 async function go(next) {
   await next.enter(go, end);
+  fit(next.camera);
+  await prepare(next.scene, next.camera);
   stage?.exit?.();
   stage = next;
-  resize();
+  scenes.add(next.scene);
 }
 
 function end() {
@@ -37,6 +42,8 @@ function end() {
     document.exitPointerLock();
     stage.exit?.();
     stage = null;
+    scenes.forEach(release);
+    scenes.clear();
     showResult(() => showRegistration(play));
   }, RESULT_DELAY_MS);
 }
@@ -53,9 +60,12 @@ function play(player) {
 
 function resize() {
   resizeView();
-  if (!stage) return;
-  stage.camera.aspect = window.innerWidth / window.innerHeight;
-  stage.camera.updateProjectionMatrix();
+  if (stage) fit(stage.camera);
+}
+
+function fit(camera) {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 }
 
 resize();
