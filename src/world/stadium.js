@@ -9,7 +9,8 @@ import { createCrowd } from './crowd.js';
 // two-tier bowl with a walkway ring between the tiers, a ring roof over the upper tier carried by
 // 58 pylons, and a 105 × 68 m pitch. The pitch's long axis is x; the main stand, with the players'
 // tunnel on the halfway line, is on the +z side. Every surface takes its look from a texture file.
-// buildStadium returns the tunnel's walls, for the camera, the key light to keep over the player,
+// buildStadium returns what the player stands on (floors) and what he and the camera can't pass
+// (walls: the tunnel, the boards and the bowl's front wall), the key light to keep over the player,
 // and the crowd.
 
 const SEGMENTS = 256;
@@ -69,7 +70,8 @@ export async function buildStadium(scene) {
     boards(),
     crowd.object,
   );
-  return { walls: tunnel(scene), key, crowd };
+  const { walls, floor } = tunnel(scene);
+  return { floors: [field, floor], walls: [...walls, ...barriers()], key, crowd };
 }
 
 // The pitch in 14 mown stripes on the apron that fills the bowl, both in the same grass texture.
@@ -191,19 +193,24 @@ function pylons([a, b], height, material) {
   return columns;
 }
 
-// Advertising boards 4 m outside the touchlines and goal lines, text facing the pitch.
-function boards() {
+// Where the advertising boards stand: 4 m outside the touchlines and goal lines, with a gap in
+// front of the tunnel. Each run [x0, z0, x1, z1] has the pitch on its left.
+function boardRuns() {
   const L = PITCH.length / 2 + 4;
   const W = PITCH.width / 2 + 4;
-  const runs = [
+  return [
     [-L, -W, L, -W],
     [L, W, BOARD.gap, W],
     [-BOARD.gap, W, -L, W],
     [L, -W + 6, L, W - 6],
     [-L, W - 6, -L, -W + 6],
   ];
+}
+
+// The advertising boards, text facing the pitch.
+function boards() {
   const geometry = mergeGeometries(
-    runs.map(([x0, z0, x1, z1]) => {
+    boardRuns().map(([x0, z0, x1, z1]) => {
       const length = Math.hypot(x1 - x0, z1 - z0);
       const run = new THREE.PlaneGeometry(length, BOARD.height);
       const uv = run.attributes.uv;
@@ -220,9 +227,25 @@ function boards() {
   return faces;
 }
 
+// The boards and the bowl's front wall as boxes: the boards one per run, the wall one per segment
+// of its ring, leaving the tunnel mouth open.
+function barriers() {
+  const boards = boardRuns().map(([x0, z0, x1, z1]) =>
+    new THREE.Box3().setFromPoints([new THREE.Vector3(x0, 0, z0), new THREE.Vector3(x1, BOARD.height, z1)]),
+  );
+  const [from, to] = aroundTunnel();
+  const at = (i, y) => {
+    const t = from + (i / SEGMENTS) * (to - from);
+    return new THREE.Vector3(FRONT.a * Math.cos(t), y, FRONT.b * Math.sin(t));
+  };
+  const wall = Array.from({ length: SEGMENTS }, (_, i) => new THREE.Box3().setFromPoints([at(i, 0), at(i + 1, TUNNEL.height)]));
+  return [...boards, ...wall];
+}
+
 // The players' tunnel under the main stand, opening onto the pitch on the halfway line: branded
 // Dinamo panels on the walls, ceiling tiles with strip lights down the middle, a rubber mat on the
-// floor. Returns its walls and ceiling as boxes, so the follow camera stays inside it.
+// floor. Returns its walls and ceiling as boxes, so the follow camera stays inside it, and the mat
+// to stand on.
 function tunnel(scene) {
   const { width, height, depth } = TUNNEL;
   const z = FRONT.b + depth / 2;
@@ -235,11 +258,15 @@ function tunnel(scene) {
   const roof = [0, height + 0.25, z, width + 1, 0.5, depth];
   const floor = new THREE.PlaneGeometry(width, depth).rotateX(-Math.PI / 2).translate(0, 0.005, z);
   const lights = [-4, 0, 4].map((dz) => box([0, height - 0.02, z + dz, 0.25, 0.04, 2]));
+  const mat = shadows(solid([floor], surface('rubber.png', 1)));
   scene.add(
     shadows(solid(walls.map(box), surface('tunnel-wall.png', 3))),
     solid([box(roof)], surface('ceiling.jpg', 4.8)),
-    shadows(solid([floor], surface('rubber.png', 1))),
+    mat,
     new THREE.Mesh(mergeGeometries(lights), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xf4f8ff).multiplyScalar(GLOW) })),
   );
-  return [...walls, roof].map(([x, y, bz, w, h, d]) => new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, y, bz), new THREE.Vector3(w, h, d)));
+  return {
+    walls: [...walls, roof].map(([x, y, bz, w, h, d]) => new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, y, bz), new THREE.Vector3(w, h, d))),
+    floor: mat,
+  };
 }
