@@ -37,6 +37,9 @@ const strings = {
     boots: 'ბუცები',
     tape: 'ტეიპი',
     talkToCoach: 'დაელაპარაკე მწვრთნელს',
+    runOut: 'გაიქეცი ცენტრალურ წრემდე',
+    sprint: 'Shift — სწრაფი სირბილი',
+    metres: 'მ',
   },
   en: {
     title: 'Dinamo: Road to Goal',
@@ -74,6 +77,9 @@ const strings = {
     boots: 'boots',
     tape: 'tape',
     talkToCoach: 'Talk to the coach',
+    runOut: 'Run to the centre circle',
+    sprint: 'Shift — sprint',
+    metres: 'm',
   },
 };
 

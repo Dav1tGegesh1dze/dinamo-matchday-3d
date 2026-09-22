@@ -647,18 +647,18 @@ run, which a stand playing all day could not afford.
 
 After question 1 the player starts in the tunnel and runs out himself, with the dressing room's
 controls: WASD, Shift to sprint, the mouse turns the camera. The top of the screen says what to do
-("Run to the centre circle", with "Shift: sprint"), and a marker with the distance stands over the
-kick-off spot. When the spot is off screen or behind the player, the marker sticks to the screen
-edge with an arrow pointing the way. The fourth official stands in the gap in the boards in front
-of the tunnel, and his board shows `▲ <name>` as the player passes. The boards, the bowl's front
-wall, the goals and the people are solid. On reaching the kick-off spot the player settles on it
-facing the goal and the team-mate's pass arrives, as before.
+("Run to the centre circle", with "Shift — sprint" under it), and a marker with the distance stands
+over the kick-off spot. When the spot is off screen or behind the player, the marker sticks to the
+screen edge with an arrow pointing the way. The fourth official stands in the gap in the boards in
+front of the tunnel, and his board shows `▲ <name>` as the player passes. The boards, the bowl's
+front wall, the goals and the people are solid. On reaching the kick-off spot the player settles on
+it facing the goal and the team-mate's pass arrives, as before.
 
-- [ ] After question 1 the player runs out himself; nothing walks him
-- [ ] The objective and the marker show where to go, also when he faces away
-- [ ] The substitution board shows his name as he passes
-- [ ] Sprinting, the run out takes about 12 s (the walk out took 36 s)
-- [ ] He cannot leave the pitch area or walk through the boards, the goals or people
+- [x] After question 1 the player runs out himself; nothing walks him
+- [x] The objective and the marker show where to go, also when he faces away
+- [x] The substitution board shows his name as he passes
+- [x] Sprinting, the run out takes about 12 s (the walk out took 36 s); jogging, about 19 s
+- [x] He cannot leave the grass inside the bowl or walk through the boards, the goals or people
 
 ### 22. `feature/stand-mode` — kiosk and downloads
 

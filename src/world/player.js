@@ -3,6 +3,7 @@ import { createCharacter, turnTowards, KITS } from './character.js';
 import { play } from './audio.js';
 
 const RADIUS = 0.35;
+const HEIGHT = 1.8; // boxes wholly above his head (a roof) don't stop him
 const JOG_SPEED = 3;
 const SPRINT_SPEED = 5;
 const GRAVITY = 20;
@@ -19,10 +20,11 @@ function axis(positive, negative) {
   return (positive.some((code) => keys.has(code)) ? 1 : 0) - (negative.some((code) => keys.has(code)) ? 1 : 0);
 }
 
-// The player: a footballer, in training clothes until he picks up his kit, who jogs relative to the camera, turns to face where
-// he goes, slides along walls (as a capsule) and stays on the floor.
-export async function createPlayer(scene, { floors, walls }, spawn) {
-  const character = await createCharacter(KITS.training);
+// The player: a footballer in `kit` (training clothes until he picks up his own), who jogs relative
+// to the camera, turns to face where he goes, slides along walls (as a capsule) and stays on the
+// floor. `character` is the footballer himself, for moves the game plays on him.
+export async function createPlayer(scene, { floors, walls }, spawn, kit = KITS.training) {
+  const character = await createCharacter(kit);
   const model = character.object;
   model.position.copy(spawn);
   model.rotation.y = Math.PI;
@@ -38,6 +40,7 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
 
   return {
     model,
+    character,
     wear: character.wear,
 
     update(dt, yaw) {
@@ -77,10 +80,11 @@ export async function createPlayer(scene, { floors, walls }, spawn) {
   };
 }
 
-// Pushes the capsule's footprint (a circle) out of every wall box it overlaps, along the shortest
-// way out, so walking into a wall at an angle slides along it.
+// Pushes the capsule's footprint (a circle) out of every wall box it overlaps at body height, along
+// the shortest way out, so walking into a wall at an angle slides along it.
 function pushOutOfWalls(position, walls) {
   for (const box of walls) {
+    if (box.min.y > position.y + HEIGHT || box.max.y < position.y) continue;
     const dx = position.x - THREE.MathUtils.clamp(position.x, box.min.x, box.max.x);
     const dz = position.z - THREE.MathUtils.clamp(position.z, box.min.z, box.max.z);
     const distance = Math.hypot(dx, dz);
