@@ -99,7 +99,7 @@ need a whole new toolchain and share no code with the 2D game.
 index.html
 vite.config.js
 package.json
-electron/main.cjs    # copied from the 2D game (roadmap item 16)
+electron/main.cjs    # copied from the 2D game (roadmap item 20)
 public/assets/
   models/            # .glb rooms, props, characters
   textures/          # floor, wall, pitch images
@@ -220,7 +220,7 @@ layout. Every later improvement replaces assets, not code.
 (tiled floor, painted walls, ceilings with strip lights, lockers, benches, a physio bed, showers)
 from CC0 textures and Poly Haven props, and proper duels on the pitch. See Phase 2 in the roadmap.
 
-**Stage 3 — lit (roadmap item 15).** One directional "sun" through the tunnel mouth, warm ceiling
+**Stage 3 — lit (roadmap items 15–19, Phase 3).** One directional "sun" through the tunnel mouth, warm ceiling
 lights, soft shadows near the player, and lightmaps baked in Blender for everything static. A
 little bloom on the tunnel exit and the stadium lights.
 
@@ -514,16 +514,84 @@ deflated, so the ball stays a white placeholder sphere for now.
 - [x] The keeper dives on every shot; a goal is celebrated
 - [x] Still 60 fps with four characters on screen
 
-### 15. `feature/lighting` — make it look good
+## Phase 3: a polished look (items 15–19)
 
-Baked lightmaps for static geometry, one sun through the tunnel, warm interior lights, soft shadows,
-a little bloom, and a colour grade.
+After playing the full game the developer found the graphics poor and asked for research into what
+successful games do. Findings:
+- **One consistent art direction.** Well-loved web games (Messenger by Abeto, built on Three.js) and
+  stylized sports games (Rocket League, FIFA Street) commit to one style; mixing photo textures with
+  low-poly characters, as the game did, reads as cheap.
+- **Lighting does most of the work:** filmic tone mapping, HDR environment lighting, soft shadows,
+  ambient occlusion and bloom. The game had none of them.
+- **Stadium games sell the atmosphere** with floodlights, bloom and a moving crowd drawn cheaply in
+  bulk (instancing).
 
-- [ ] Rooms read as lit spaces with believable shadows
-- [ ] The tunnel exit is a bright, inviting target
-- [ ] Still 60 fps on the stand laptop
+The developer chose:
 
-### 16. `feature/stand-mode` — kiosk and downloads
+| Question | Answer |
+|----------|--------|
+| Art direction | **Stylized and polished**: clean saturated colours, soft shadows, smooth characters |
+| Match time | **Night, under floodlights** |
+| Stand computer | **Not known yet**: the game picks its quality level itself |
+| Upgrades | **Better player models** and **a living crowd** |
+
+**Assets for Phase 3** (all CC0): Quaternius *Universal Base Characters* (smooth 13k-triangle
+humans with skin, normal and roughness maps, and separate hairstyles) and Quaternius *Universal
+Animation Library* (43 clips on the same 65-bone skeleton, so they play on the characters with no
+retargeting: idle, walk, jog, sprint, talk, jump, fall, dance, sitting…); Poly Haven HDRIs for
+environment lighting and the night sky. The characters come as bare bodies, so each kit is painted
+on offline: every triangle becomes shirt, shorts, socks, boots or skin by the bones it follows and
+its height.
+
+### 15. `feature/render-pipeline` — light it like a game
+
+Filmic tone mapping, soft shadows from one key light that follows the action, HDR environment
+lighting from a Poly Haven HDRI, and post-processing: ambient occlusion, bloom on bright things,
+and anti-aliasing. **Automatic quality:** the game measures its frame rate in the first seconds of
+a stage and steps down (ambient occlusion off, then bloom and shadows off, then a lower pixel
+ratio) until it holds about 60 fps.
+
+- [ ] Characters and furniture cast soft shadows; corners and contact points darken (ambient occlusion)
+- [ ] Colours are filmic, not flat; bright lights glow
+- [ ] On a weak machine the quality steps down by itself and the frame rate recovers
+
+### 16. `feature/hero-players` — better people
+
+Every person becomes a Universal Base Character: the player (training kit, then the Dinamo kit as he
+finds it), team-mate, defenders, keeper, fourth official, and the coach in a club tracksuit. The
+clips come from the Universal Animation Library. The shirt and boots you pick up are the new
+model's own shirt and boots.
+
+- [ ] Every person is the new smooth model, with hair, in a painted kit with knee-length socks
+- [ ] Idle, jog, sprint, walk, talk, the tackle, the fall, the dive and the celebration all play
+- [ ] Still 60 fps at the top quality level with every character on screen
+
+### 17. `feature/night-stadium` — a floodlit night match
+
+A night sky, floodlights that glow with bloom, a bright pitch under darker stands, cleaner stylized
+grass with strong mowing stripes, and LED advertising boards that light up.
+
+- [ ] The walk out is a night match: dark sky, glowing floodlights, a bright pitch
+- [ ] The stadium still reads as the Dinamo Arena (§10)
+
+### 18. `feature/living-crowd` — fans who move
+
+Thousands of fans drawn in bulk (instanced billboards from a sprite sheet made from the character
+model) in Dinamo blue and white, bouncing and waving at their own rhythm, a few scarves held up, and
+camera flashes during the walk out. They jump on a goal.
+
+- [ ] The stands are full of moving fans, not a still picture
+- [ ] Camera flashes spark during the walk out; the crowd jumps on a goal
+- [ ] Still 60 fps at the top quality level with the whole bowl in view
+
+### 19. `feature/stylized-rooms` — the rooms match the new look
+
+Cleaner, consistent textures and colours in the dressing room and tunnel, so nothing looks like a
+photograph pasted next to a stylized character.
+
+- [ ] Floors, walls and props share one clean palette with the characters
+
+### 20. `feature/stand-mode` — kiosk and downloads
 
 Fullscreen on Start, no right-click, pixel-ratio cap, offline check. Copy `electron/main.cjs` and
 `release.yml` from the 2D repo so GitHub Actions builds the Mac and Windows apps and publishes them
