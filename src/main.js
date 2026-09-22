@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { t } from './lib/i18n.js';
 import { run, startRun } from './lib/run.js';
 import { dressingRoom } from './stages/dressingRoom.js';
@@ -6,6 +5,7 @@ import { showRegistration } from './ui/registration.js';
 import { showResult } from './ui/result.js';
 import { showTimer } from './ui/hud.js';
 import { play as playSound, unlockAudio } from './world/audio.js';
+import { renderer, render, resize as resizeView } from './world/graphics.js';
 
 // Game flow: registration → dressing room → tunnel → pitch → result → registration for the next player.
 // Stage controller: one renderer, one canvas, one loop. The active stage owns its scene and camera,
@@ -15,8 +15,6 @@ import { play as playSound, unlockAudio } from './world/audio.js';
 const MAX_STEP = 0.05;
 const RESULT_DELAY_MS = 2500; // time to read "GOAL!" or "Tackled!" before the result screen
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 document.body.append(renderer.domElement);
 
 const overlay = document.getElementById('overlay');
@@ -54,7 +52,7 @@ function play(player) {
 }
 
 function resize() {
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  resizeView();
   if (!stage) return;
   stage.camera.aspect = window.innerWidth / window.innerHeight;
   stage.camera.updateProjectionMatrix();
@@ -66,10 +64,10 @@ showRegistration(play);
 
 let last = 0;
 renderer.setAnimationLoop((time) => {
-  const dt = Math.min((time - last) / 1000, MAX_STEP);
+  const seconds = (time - last) / 1000;
   last = time;
   if (!stage) return;
-  if (document.pointerLockElement === renderer.domElement) stage.update(dt);
+  if (document.pointerLockElement === renderer.domElement) stage.update(Math.min(seconds, MAX_STEP));
   showTimer(run);
-  renderer.render(stage.scene, stage.camera);
+  render(stage.scene, stage.camera, seconds);
 });

@@ -294,7 +294,7 @@ under a ring roof. Not a photographic replica.
 | Item | Budget |
 |------|--------|
 | Frame rate | 60 fps at 1280×720, never below 30 |
-| Draw calls per frame | under 150 |
+| Draw calls per frame | under 150 for the scene itself; shadow and post-processing passes come on top, and the automatic quality levels (item 15) trim them on slower machines |
 | Triangles on screen | under 300k |
 | Animated characters on screen | at most 4 (player + coach, or player + 3 opponents) |
 | Real-time lights | 1 directional + ambient; everything else baked |
@@ -551,9 +551,9 @@ and anti-aliasing. **Automatic quality:** the game measures its frame rate in th
 a stage and steps down (ambient occlusion off, then bloom and shadows off, then a lower pixel
 ratio) until it holds about 60 fps.
 
-- [ ] Characters and furniture cast soft shadows; corners and contact points darken (ambient occlusion)
-- [ ] Colours are filmic, not flat; bright lights glow
-- [ ] On a weak machine the quality steps down by itself and the frame rate recovers
+- [x] Characters and furniture cast soft shadows; corners and contact points darken (ambient occlusion)
+- [x] Colours are filmic, not flat; bright lights glow
+- [x] On a weak machine the quality steps down by itself and the frame rate recovers
 
 ### 16. `feature/hero-players` — better people
 

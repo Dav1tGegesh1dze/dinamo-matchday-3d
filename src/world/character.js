@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { loadModel } from './loader.js';
+import { shadows } from './graphics.js';
 
 // Kit colours by material name. The Animated Men Pack names its materials Shirt, Pants, Socks, ...;
 // Shoes was split off from Eyes in footballer.glb so boots can change colour on their own.
@@ -90,6 +91,7 @@ export async function kitPiece(material, colour) {
 }
 
 function dress(scene, kit) {
+  shadows(scene);
   scene.scale.setScalar(PACK_SCALE);
   scene.traverse((node) => {
     if (!node.isMesh) return;

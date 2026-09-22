@@ -11,6 +11,7 @@ import { askQuestion } from '../ui/question.js';
 import { finishRun } from '../lib/run.js';
 import { tunnel } from './tunnel.js';
 import { listener, play, loop, loopAt } from '../world/audio.js';
+import { loadEnvironment, shadows } from '../world/graphics.js';
 import { t } from '../lib/i18n.js';
 
 // The 2D game's map at 1.25 m per tile, so its 2-tile corridors are 2.5 m wide. Top left is the
@@ -69,6 +70,7 @@ const LOOK = {
 const WOOD = surface('wood.jpg', 1.2);
 const SIGNS = new THREE.MeshStandardMaterial({ map: loadTexture('signs.png') });
 const SIGN_HEIGHT = 2.72; // hangs above where the camera usually is
+const ENVIRONMENT_INTENSITY = 0.8;
 const GLOW = { strength: 0.6, speed: 3 }; // kit still to find pulses brighter in its own colour, to catch the eye
 const COACH_SIZE = 0.6; // the coach blocks the player like a 0.6 m wall box
 const MUSIC_VOLUME = 0.7;
@@ -80,10 +82,14 @@ export const dressingRoom = {
 
   async enter(go, end) {
     this.scene = new THREE.Scene();
+    this.scene.environment = await loadEnvironment('studio');
+    this.scene.environmentIntensity = ENVIRONMENT_INTENSITY;
     const layout = layoutFromGrid(MAP, TILE, WALL_HEIGHT);
     const level = buildLevel(this.scene, layout, LOOK);
+    this.key = level.key;
     const rests = await this.furnish(level, layout.spots);
     this.player = await createPlayer(this.scene, level, layout.spots.P);
+    this.key.follow(this.player.model.position);
     this.follow = createFollowCamera(level, this.player.model);
     this.camera = this.follow.camera;
     this.camera.add(listener);
@@ -95,7 +101,7 @@ export const dressingRoom = {
     this.things = [];
     showKit(Object.keys(KIT));
     for (const [name, { look, wear }] of Object.entries(KIT)) {
-      const item = await look();
+      const item = shadows(await look());
       item.position.copy(rests[name].position);
       item.rotation.y = rests[name].yaw;
       if (name === 'tape') item.scale.setScalar(TAPE_SCALE);
@@ -150,7 +156,7 @@ export const dressingRoom = {
   // his locker, the boots on the bench, the tape on the treatment bed.
   async furnish(level, spots) {
     const add = ({ object, boxes }) => {
-      this.scene.add(object);
+      this.scene.add(shadows(object));
       level.walls.push(...boxes);
     };
     const prop = async (name, x, z, yaw = 0, scale = 1) => {
@@ -158,7 +164,7 @@ export const dressingRoom = {
       object.position.set(x, 0, z);
       object.rotation.y = yaw;
       object.scale.setScalar(scale);
-      this.scene.add(object);
+      this.scene.add(shadows(object));
       level.walls.push(new THREE.Box3().setFromObject(object));
     };
 
@@ -225,6 +231,7 @@ export const dressingRoom = {
     this.time += dt;
     this.player.update(dt, this.follow.yaw);
     this.follow.update(dt);
+    this.key.follow(this.player.model.position);
     this.coach.update(dt);
     const glow = GLOW.strength * (0.5 + 0.5 * Math.sin(this.time * GLOW.speed));
     for (const item of this.items) {
