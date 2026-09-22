@@ -45,13 +45,20 @@ const MAP = [
 const TILE = 1.25;
 const WALL_HEIGHT = 3;
 // The kit to find: how it looks lying there, and what picking it up changes on the player. The shirt
-// and boots are the footballer model's own shirt and shoes.
+// and boots are the footballer model's own shirt and boots.
 const KIT = {
-  shirt: { look: () => kitPiece('Shirt', KITS.dinamo.Shirt), wear: { Shirt: KITS.dinamo.Shirt, Pants: KITS.dinamo.Pants } },
-  boots: { look: () => kitPiece('Shoes', KITS.dinamo.Shoes), wear: { Shoes: KITS.dinamo.Shoes } },
+  shirt: { look: hangingShirt, wear: { Shirt: KITS.dinamo.Shirt, Shorts: KITS.dinamo.Shorts } },
+  boots: { look: () => kitPiece('Boots', KITS.dinamo.Boots), wear: { Boots: KITS.dinamo.Boots } },
   tape: { look: async () => (await loadModel('tape')).scene, wear: { Socks: KITS.dinamo.Socks } },
 };
 const TAPE_SCALE = 2; // the real 5 cm roll is too small to spot
+const HANGING_DEPTH = 0.3; // a shirt on a hook hangs flat, not in the shape of a chest
+
+async function hangingShirt() {
+  const shirt = await kitPiece('Shirt', KITS.dinamo.Shirt);
+  shirt.scale.z = HANGING_DEPTH;
+  return shirt;
+}
 // What the rooms are made of: tiled floor, painted walls with a Dinamo-blue band, ceiling tiles with
 // light panels, white tiles on the shower block's floor and walls, and the tunnel's branded panels
 // and rubber mat at the tunnel mouth.
@@ -123,10 +130,10 @@ export const dressingRoom = {
       this.things.push(thing);
     }
 
-    this.coach = await createCharacter('coach', {});
+    this.coach = await createCharacter(KITS.coach);
     this.coach.object.position.copy(layout.spots.C);
     this.coach.object.rotation.y = -Math.PI / 2; // faces west, towards the player coming in
-    this.coach.play('Idle');
+    this.coach.play('talk');
     this.scene.add(this.coach.object);
     level.walls.push(new THREE.Box3().setFromCenterAndSize(layout.spots.C, new THREE.Vector3(COACH_SIZE, 4, COACH_SIZE)));
     const coachThing = {
@@ -177,7 +184,7 @@ export const dressingRoom = {
     const own = west.hooks.reduce((best, hook) => (hook.distanceTo(spots.s) < best.distanceTo(spots.s) ? hook : best));
     const shirts = [...west.hooks.map((hook) => [hook, Math.PI / 2]), ...north.hooks.map((hook) => [hook, 0])];
     for (const [hook, yaw] of shirts.filter(([hook]) => hook !== own)) {
-      const shirt = await kitPiece('Shirt', KITS.dinamo.Shirt);
+      const shirt = await hangingShirt();
       shirt.position.copy(hook);
       shirt.rotation.y = yaw;
       this.scene.add(shirt);

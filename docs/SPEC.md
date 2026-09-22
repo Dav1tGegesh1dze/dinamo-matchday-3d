@@ -562,9 +562,9 @@ finds it), team-mate, defenders, keeper, fourth official, and the coach in a clu
 clips come from the Universal Animation Library. The shirt and boots you pick up are the new
 model's own shirt and boots.
 
-- [ ] Every person is the new smooth model, with hair, in a painted kit with knee-length socks
-- [ ] Idle, jog, sprint, walk, talk, the tackle, the fall, the dive and the celebration all play
-- [ ] Still 60 fps at the top quality level with every character on screen
+- [x] Every person is the new smooth model, with hair, in a painted kit with knee-length socks
+- [x] Idle, jog, sprint, walk, talk, the tackle, the fall, the dive and the celebration all play
+- [x] Still 60 fps at the top quality level with every character on screen
 
 ### 17. `feature/night-stadium` — a floodlit night match
 
