@@ -20,7 +20,7 @@ const TARGET_FPS = 50;
 const WARM_UP_SECONDS = 1; // a new stage stutters while its shaders compile; don't judge that
 const SAMPLE_SECONDS = 2;
 // Only what is far brighter than white glows (sunlit white is about 2): lamps are drawn at GLOW on purpose.
-const BLOOM = { strength: 0.5, radius: 0.5, threshold: 2 };
+const BLOOM = { strength: 0.6, radius: 0.35, threshold: 2 };
 const SHADOW_MAP = 2048;
 
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -29,25 +29,30 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const pmrem = new THREE.PMREMGenerator(renderer);
 const hdrLoader = new HDRLoader();
+const images = new Map();
 const environments = new Map();
 let level = 0;
 let composer = null;
 let view = { scene: null, camera: null };
 let clock = { warm: 0, frames: 0, seconds: 0 };
 
-// The light an HDR image in public/assets/env/<name>.hdr casts on everything (and what shiny
-// surfaces reflect). Each image is prepared once.
-export function loadEnvironment(name) {
-  if (!environments.has(name)) {
-    environments.set(
+// An HDR image from public/assets/env/<name>.hdr, as a sky to show behind everything.
+export function loadSky(name) {
+  if (!images.has(name)) {
+    images.set(
       name,
       hdrLoader.loadAsync(`assets/env/${name}.hdr`).then((hdr) => {
-        const environment = pmrem.fromEquirectangular(hdr).texture;
-        hdr.dispose();
-        return environment;
+        hdr.mapping = THREE.EquirectangularReflectionMapping;
+        return hdr;
       }),
     );
   }
+  return images.get(name);
+}
+
+// The light the same image casts on everything (and what shiny surfaces reflect). Prepared once.
+export function loadEnvironment(name) {
+  if (!environments.has(name)) environments.set(name, loadSky(name).then((hdr) => pmrem.fromEquirectangular(hdr).texture));
   return environments.get(name);
 }
 

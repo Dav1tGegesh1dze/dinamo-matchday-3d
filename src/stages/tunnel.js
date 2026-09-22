@@ -8,7 +8,7 @@ import { run } from '../lib/run.js';
 import { rollBall, BALL_RADIUS } from '../world/ball.js';
 import { pitch, addOpponents } from './pitch.js';
 import { listener, loop } from '../world/audio.js';
-import { loadEnvironment, shadows } from '../world/graphics.js';
+import { shadows } from '../world/graphics.js';
 
 // The walk out, played by itself: from inside the tunnel, out past the fourth official holding up
 // the substitution board, to the centre circle, where a team-mate's pass arrives at the player's
@@ -28,7 +28,6 @@ const ATTACK = [1, 0]; // the player attacks the goal at +x
 const PASS = { from: new THREE.Vector3(-16, 0.11, -14), seconds: 1.6 };
 const TEAMMATE = new THREE.Vector3(-16.6, 0, -14.4); // stands just behind the ball he passes
 const TURN_RATE = 8;
-const ENVIRONMENT_INTENSITY = 0.6;
 // The crowd swells from muffled in the tunnel to full on the pitch.
 const CROWD = { inTunnel: 0.15, onPitch: 0.5, pitchZ: 40, tunnelZ: 58 }; // volumes, and where the swell starts and ends
 
@@ -39,11 +38,9 @@ export const tunnel = {
   async enter(go) {
     this.go = go;
     this.scene = new THREE.Scene();
-    this.scene.environment = await loadEnvironment('studio');
-    this.scene.environmentIntensity = ENVIRONMENT_INTENSITY;
     showKit([]);
     showPrompt(null);
-    const { walls, key } = buildStadium(this.scene);
+    const { walls, key } = await buildStadium(this.scene);
     this.key = key;
 
     for (const side of [-1, 1]) {
