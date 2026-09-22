@@ -22,7 +22,7 @@ function axis(positive, negative) {
 // The player: a footballer, in training clothes until he picks up his kit, who jogs relative to the camera, turns to face where
 // he goes, slides along walls (as a capsule) and stays on the floor.
 export async function createPlayer(scene, { floors, walls }, spawn) {
-  const character = await createCharacter('footballer', KITS.training);
+  const character = await createCharacter(KITS.training);
   const model = character.object;
   model.position.copy(spawn);
   model.rotation.y = Math.PI;

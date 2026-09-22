@@ -17,8 +17,8 @@ npm run dev
 
 Listed for reference. Everything is CC0 (public domain) unless noted:
 
-- `public/assets/models/footballer.glb`: Quaternius, *Animated Men Pack*, via [poly.pizza](https://poly.pizza/m/HMnuH5geEG); the shoes are split off the `Eyes` material into their own `Shoes` material
-- `public/assets/models/coach.glb`: Quaternius, *Animated Men Pack*, via [poly.pizza](https://poly.pizza/m/mQnGoME1ez)
+- `public/assets/models/footballer.glb`: Quaternius, *Universal Base Characters* (Superhero male, light skin) with the *Buzzed* hairstyle merged in; the body is split offline into kit parts (Shirt, Sleeves, Shorts, Legs, Socks, Boots) and the cloth loosened ([quaternius.com](https://quaternius.com/packs/universalbasecharacters.html))
+- `public/assets/models/animations.glb`: Quaternius, *Universal Animation Library*, the 10 clips the game plays ([quaternius.com](https://quaternius.com/packs/universalanimationlibrary.html))
 - `public/assets/icons/*.png`, `public/assets/audio/*.wav`: from the 2D game `dinamo-matchday`
 - `public/assets/textures/grass.jpg`: ambientCG, *Grass 005* ([ambientcg.com](https://ambientcg.com/view?id=Grass005)), resized to 512 px
 - `public/assets/textures/seats.png`, `boards.png`: drawn for this project; the board lettering uses Noto Sans and Noto Sans Georgian (SIL Open Font License)

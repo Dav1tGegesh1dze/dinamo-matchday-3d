@@ -25,7 +25,7 @@ const BALL_AHEAD = 0.5; // metres in front of the player's feet while dribbling
 const CHARGE_GAP = 9; // the defender runs at the player once they are this close…
 const CHARGE_SPEED = 4;
 const SLIDE_GAP = 3.2; // …and slides in from here, feet first
-const SLIDE = { pose: 1.5, tilt: -0.9, drop: -0.1, seconds: 0.7, distance: 2.4 }; // the Sitting pose tipped back
+const SLIDE = { pose: 0.5, tilt: -0.9, drop: -0.1, seconds: 0.7, distance: 2.4 }; // the sitting pose tipped back
 const HURDLE = { seconds: 1.1, distance: 4.6, height: 0.55 }; // the player's jump over the slide
 const GET_UP_SECONDS = 0.4;
 const POKE = { to: new THREE.Vector3(0, 0, 4), seconds: 0.8 }; // where a winning tackle knocks the ball
@@ -38,7 +38,7 @@ const DIVE = { seconds: 0.5, sideways: 1.4, lean: 1.3 };
 export async function addOpponents(scene) {
   return Promise.all(
     OPPONENTS.map(async ({ kit, x }) => {
-      const opponent = await createCharacter('footballer', kit);
+      const opponent = await createCharacter(kit);
       opponent.object.position.set(x, 0, LANE_Z);
       opponent.object.rotation.order = 'YXZ'; // turn first, then tip back for the slide
       opponent.object.rotation.y = -Math.PI / 2; // faces the player coming from -x
@@ -128,7 +128,7 @@ export const pitch = {
         defender.moveAt(CHARGE_SPEED);
       },
     );
-    defender.pose('Sitting', SLIDE.pose);
+    defender.pose('slide', SLIDE.pose);
     model.rotation.x = SLIDE.tilt;
     model.position.y = SLIDE.drop;
   },
@@ -147,7 +147,7 @@ export const pitch = {
     const model = defender.object;
     const slideFrom = model.position.x;
     const jumpFrom = player.object.position.x;
-    player.play('RunningJump', 1, true);
+    player.play('hurdle');
     await this.until((dt, time) => {
       const progress = Math.min(1, time / HURDLE.seconds);
       const lift = Math.sin(Math.PI * progress) * HURDLE.height;
@@ -172,7 +172,7 @@ export const pitch = {
     const slideFrom = defender.object.position.x;
     const reach = slideFrom - (tunnel.ball.position.x + 0.2); // his boots end at the ball
     await this.until((dt, time) => this.slide(defender, slideFrom, time, reach));
-    player.play('Death', 1, true);
+    player.play('fall', 1, true);
     playSound('tackle');
     const from = tunnel.ball.position.clone();
     const to = from.clone().add(POKE.to);
@@ -191,7 +191,7 @@ export const pitch = {
   async goal(keeper) {
     finishRun(true);
     await this.shoot(keeper, TOP_CORNER);
-    tunnel.player.play('Jump');
+    tunnel.player.play('celebrate');
     playSound('goal');
     flash(t('goal'));
     this.end();
@@ -212,8 +212,8 @@ export const pitch = {
   shoot(keeper, target) {
     const start = tunnel.ball.position.clone();
     const diveFrom = keeper.object.position.z;
-    tunnel.player.play('RunningJump', 1.5, true); // the swing of the leg reads as the strike
-    keeper.play('Jump', 1, true);
+    tunnel.player.play('shoot', 1.5, true);
+    keeper.play('dive');
     return this.until((dt, time) => {
       const progress = Math.min(1, time / SHOT.seconds);
       tunnel.ball.position.lerpVectors(start, target, progress);

@@ -53,14 +53,14 @@ export const tunnel = {
       this.scene.add(goal);
     }
 
-    this.player = await createCharacter('footballer', KITS.dinamo);
+    this.player = await createCharacter(KITS.dinamo);
     this.player.object.position.copy(START);
     this.player.object.rotation.y = Math.PI;
     this.key.follow(START);
     this.player.moveAt(0);
     this.scene.add(this.player.object);
 
-    this.official = await createCharacter('footballer', KITS.official);
+    this.official = await createCharacter(KITS.official);
     this.official.object.position.copy(OFFICIAL);
     this.official.object.rotation.y = Math.PI / 2;
     this.official.moveAt(0);
@@ -70,7 +70,7 @@ export const tunnel = {
     this.board.rotation.y = Math.PI / 2;
     this.scene.add(this.board);
 
-    this.teammate = await createCharacter('footballer', KITS.dinamo);
+    this.teammate = await createCharacter(KITS.dinamo);
     this.teammate.object.position.copy(TEAMMATE);
     this.teammate.object.rotation.y = Math.atan2(-1 - TEAMMATE.x, 0.6 - TEAMMATE.z); // faces the centre circle
     this.teammate.moveAt(0);
