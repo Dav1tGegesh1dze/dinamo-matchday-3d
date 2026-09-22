@@ -8,6 +8,7 @@ import { run } from '../lib/run.js';
 import { rollBall, BALL_RADIUS } from '../world/ball.js';
 import { pitch, addOpponents } from './pitch.js';
 import { listener, loop } from '../world/audio.js';
+import { loadEnvironment, shadows } from '../world/graphics.js';
 
 // The walk out, played by itself: from inside the tunnel, out past the fourth official holding up
 // the substitution board, to the centre circle, where a team-mate's pass arrives at the player's
@@ -27,6 +28,7 @@ const ATTACK = [1, 0]; // the player attacks the goal at +x
 const PASS = { from: new THREE.Vector3(-16, 0.11, -14), seconds: 1.6 };
 const TEAMMATE = new THREE.Vector3(-16.6, 0, -14.4); // stands just behind the ball he passes
 const TURN_RATE = 8;
+const ENVIRONMENT_INTENSITY = 0.6;
 // The crowd swells from muffled in the tunnel to full on the pitch.
 const CROWD = { inTunnel: 0.15, onPitch: 0.5, pitchZ: 40, tunnelZ: 58 }; // volumes, and where the swell starts and ends
 
@@ -37,12 +39,15 @@ export const tunnel = {
   async enter(go) {
     this.go = go;
     this.scene = new THREE.Scene();
+    this.scene.environment = await loadEnvironment('studio');
+    this.scene.environmentIntensity = ENVIRONMENT_INTENSITY;
     showKit([]);
     showPrompt(null);
-    const { walls } = buildStadium(this.scene);
+    const { walls, key } = buildStadium(this.scene);
+    this.key = key;
 
     for (const side of [-1, 1]) {
-      const { scene: goal } = await loadModel('goal');
+      const goal = shadows((await loadModel('goal')).scene);
       goal.position.x = side * 52.5;
       goal.rotation.y = side > 0 ? Math.PI : 0;
       this.scene.add(goal);
@@ -51,6 +56,7 @@ export const tunnel = {
     this.player = await createCharacter('footballer', KITS.dinamo);
     this.player.object.position.copy(START);
     this.player.object.rotation.y = Math.PI;
+    this.key.follow(START);
     this.player.moveAt(0);
     this.scene.add(this.player.object);
 
@@ -59,7 +65,7 @@ export const tunnel = {
     this.official.object.rotation.y = Math.PI / 2;
     this.official.moveAt(0);
     this.scene.add(this.official.object);
-    ({ scene: this.board } = await loadModel('board'));
+    this.board = shadows((await loadModel('board')).scene);
     this.board.position.copy(OFFICIAL).add(BOARD_OFFSET);
     this.board.rotation.y = Math.PI / 2;
     this.scene.add(this.board);
@@ -72,7 +78,7 @@ export const tunnel = {
 
     this.opponents = await addOpponents(this.scene);
 
-    ({ scene: this.ball } = await loadModel('ball'));
+    this.ball = shadows((await loadModel('ball')).scene);
     this.ball.position.copy(PASS.from);
     this.scene.add(this.ball);
 
@@ -110,6 +116,7 @@ export const tunnel = {
     }
 
     this.follow.driftBehind(dt);
+    this.key.follow(model.position);
     const inside = THREE.MathUtils.smoothstep(model.position.z, CROWD.pitchZ, CROWD.tunnelZ);
     this.crowd.setVolume(THREE.MathUtils.lerp(CROWD.onPitch, CROWD.inTunnel, inside));
     this.player.update(dt);

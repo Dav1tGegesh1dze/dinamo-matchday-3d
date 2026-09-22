@@ -2,11 +2,13 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { loadTexture as texture } from './loader.js';
 import { worldUvs, solid, surface } from './level.js';
+import { keyLight, shadows, GLOW } from './graphics.js';
 
 // The Boris Paichadze Dinamo Arena, built from its real proportions (see docs/SPEC.md §10): an oval
 // two-tier bowl with a walkway ring between the tiers, a ring roof over the upper tier carried by
 // 58 pylons, and a 105 × 68 m pitch. The pitch's long axis is x; the main stand, with the players'
 // tunnel on the halfway line, is on the +z side. Every surface takes its look from a texture file.
+// buildStadium returns the tunnel's walls, for the camera, and the key light to keep over the player.
 
 const SEGMENTS = 256;
 const PITCH = { length: 105, width: 68 };
@@ -25,12 +27,12 @@ export function buildStadium(scene) {
   const roof = new THREE.MeshStandardMaterial({ color: 0xdadcdf, side: THREE.DoubleSide });
 
   scene.background = new THREE.Color(0x9cc4e8);
-  scene.add(new THREE.HemisphereLight(0xdfeeff, 0x6a6e66, 1.4));
-  const sun = new THREE.DirectionalLight(0xfff4e0, 2.2);
-  sun.position.set(-60, 120, 80);
-  scene.add(sun);
+  scene.add(new THREE.HemisphereLight(0xdfeeff, 0x6a6e66, 0.9));
+  const key = keyLight(scene, { colour: 0xfff4e0, intensity: 2.4, offset: new THREE.Vector3(-12, 30, 16), reach: 16 });
 
-  scene.add(pitch(grass), markings());
+  const field = pitch(grass);
+  field.receiveShadow = true;
+  scene.add(field, markings());
 
   // The bowl, from the front wall up to the roof. [a, b, y] is an ellipse at a height.
   const lowTop = [104, 82, 13];
@@ -49,7 +51,7 @@ export function buildStadium(scene) {
     pylons([139, 117], 40, concrete),
     boards(),
   );
-  return { walls: tunnel(scene) };
+  return { walls: tunnel(scene), key };
 }
 
 // The pitch in 14 mown stripes on the apron that fills the bowl, both in the same grass texture.
@@ -144,7 +146,7 @@ function seatRepeat([a0, b0, y0], [a1, b1, y1]) {
 function floodlights([a, b, y]) {
   const lamps = new THREE.InstancedMesh(
     new THREE.BoxGeometry(1.6, 0.7, 0.3),
-    new THREE.MeshBasicMaterial({ color: 0xfffbe8 }),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(0xfffbe8).multiplyScalar(GLOW) }),
     FLOODLIGHTS,
   );
   const lamp = new THREE.Object3D();
@@ -216,10 +218,10 @@ function tunnel(scene) {
   const floor = new THREE.PlaneGeometry(width, depth).rotateX(-Math.PI / 2).translate(0, 0.005, z);
   const lights = [-4, 0, 4].map((dz) => box([0, height - 0.02, z + dz, 0.25, 0.04, 2]));
   scene.add(
-    solid(walls.map(box), surface('tunnel-wall.png', 3)),
+    shadows(solid(walls.map(box), surface('tunnel-wall.png', 3))),
     solid([box(roof)], surface('ceiling.jpg', 4.8)),
-    solid([floor], surface('rubber.png', 1)),
-    new THREE.Mesh(mergeGeometries(lights), new THREE.MeshBasicMaterial({ color: 0xf4f8ff })),
+    shadows(solid([floor], surface('rubber.png', 1))),
+    new THREE.Mesh(mergeGeometries(lights), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xf4f8ff).multiplyScalar(GLOW) })),
   );
   return [...walls, roof].map(([x, y, bz, w, h, d]) => new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, y, bz), new THREE.Vector3(w, h, d)));
 }

@@ -27,3 +27,4 @@ Listed for reference. Everything is CC0 (public domain) unless noted:
 - `public/assets/textures/walls.jpg`: ambientCG *Painted Plaster 017* with the Dinamo-blue band added; `signs.png`: drawn for this project (Noto fonts, SIL Open Font License)
 - `public/assets/models/chalkboard.glb`, `crate.glb`, `shelves.glb`, `wet-floor-sign.glb`: Poly Haven *Standing Chalkboard 01*, *Plastic Crate 01*, *Steel Frame Shelves 01*, *Wet Floor Sign 01*, converted to `.glb` with 512 px WebP textures
 - `public/assets/textures/tunnel-wall.png`, `rubber.png`: drawn for this project (Noto fonts, SIL Open Font License)
+- `public/assets/env/studio.hdr`: Poly Haven, *Brown Photostudio 02* HDRI ([polyhaven.com](https://polyhaven.com/a/brown_photostudio_02)), 1k

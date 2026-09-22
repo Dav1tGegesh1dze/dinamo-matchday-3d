@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { loadTexture } from './loader.js';
+import { keyLight, shadows } from './graphics.js';
 
 // A textured surface: the material, and how many metres one repeat of its texture covers.
 export function surface(textureName, tile) {
@@ -11,26 +12,29 @@ export function surface(textureName, tile) {
 // ceiling }, plus `zones` — areas [x0, z0, x1, z1] with their own floor, and wall panels on every
 // wall face inside the area (the showers' tiles). Walls are merged into one mesh. Returns what the
 // player stands on (floors), what the player and camera collide with (walls, as axis-aligned boxes)
-// and the ceiling height.
+// the ceiling height, and the key light to keep over the player.
 export function buildLevel(scene, { floor, boxes }, look) {
   scene.background = new THREE.Color(0x1d2230);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x6a6f7a, 1.6));
-  const sun = new THREE.DirectionalLight(0xfff6e8, 1.2);
-  sun.position.set(4, 10, 6);
-  scene.add(sun);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x6a6f7a, 0.6));
+  const key = keyLight(scene, { colour: 0xfff4e6, intensity: 2, offset: new THREE.Vector3(2.5, 9, 3.5), reach: 10 });
 
   const whole = [floor.x - floor.w / 2, floor.z - floor.d / 2, floor.x + floor.w / 2, floor.z + floor.d / 2];
   const floorMesh = plane(whole, 0, look.floor, true);
+  floorMesh.receiveShadow = true;
   scene.add(floorMesh);
-  for (const zone of look.zones) scene.add(plane(zone.area, 0.005, zone.floor, true));
+  for (const zone of look.zones) {
+    const patch = plane(zone.area, 0.005, zone.floor, true);
+    patch.receiveShadow = true;
+    scene.add(patch);
+  }
   const height = Math.max(...boxes.map((box) => box.h));
   scene.add(plane(whole, height, look.ceiling, false));
 
-  scene.add(solid(boxes.map(({ x, z, w, d, h }) => new THREE.BoxGeometry(w, h, d).translate(x, h / 2, z)), look.wall));
+  scene.add(shadows(solid(boxes.map(({ x, z, w, d, h }) => new THREE.BoxGeometry(w, h, d).translate(x, h / 2, z)), look.wall)));
   const walls = boxes.map(({ x, z, w, d, h }) => new THREE.Box3(new THREE.Vector3(x - w / 2, 0, z - d / 2), new THREE.Vector3(x + w / 2, h, z + d / 2)));
-  for (const zone of look.zones) scene.add(solid(cladding(walls, zone.area), zone.wall));
+  for (const zone of look.zones) scene.add(shadows(solid(cladding(walls, zone.area), zone.wall)));
 
-  return { floors: [floorMesh], walls, ceiling: height };
+  return { floors: [floorMesh], walls, ceiling: height, key };
 }
 
 // Panels 5 mm in front of every wall face (or part of one) that lies inside `area`.

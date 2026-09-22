@@ -75,6 +75,7 @@ export const pitch = {
     for (const opponent of tunnel.opponents) opponent.update(dt);
     tunnel.follow.driftBehind(dt);
     tunnel.follow.update(dt);
+    tunnel.key.follow(tunnel.player.object.position);
   },
 
   // Runs `step(dt, seconds so far)` every frame until it returns true.
