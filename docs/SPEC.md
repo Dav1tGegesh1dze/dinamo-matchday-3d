@@ -590,7 +590,7 @@ camera flashes during the walk out. They jump on a goal.
 Cleaner, consistent textures and colours in the dressing room and tunnel, so nothing looks like a
 photograph pasted next to a stylized character.
 
-- [ ] Floors, walls and props share one clean palette with the characters
+- [x] Floors, walls and props share one clean palette with the characters
 
 ### 20. `feature/stand-mode` — kiosk and downloads
 
