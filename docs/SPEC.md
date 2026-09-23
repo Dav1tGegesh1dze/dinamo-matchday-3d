@@ -672,5 +672,6 @@ Mac build is one universal `.dmg` (Apple chip and Intel), ad-hoc signed so that 
 Anyway" instead of calling an unsigned download damaged.
 
 - [x] The app opens fullscreen and plays with no internet
-- [ ] A tagged build publishes downloadable Mac and Windows files
+- [x] A tagged build publishes downloadable Mac and Windows files (v0.1.0: a universal Mac `.dmg`, a
+  Windows installer and zip)
 
