@@ -322,9 +322,11 @@ out.
 ## 13. Offline and stand behaviour
 
 Same as the 2D game. `npm run build` makes a static `dist/` that runs from any local server with no
-internet. The desktop app is the 2D game's Electron wrapper, opening `dist/index.html` fullscreen.
-Mac and Windows builds come from GitHub Actions, never from a developer machine, and are published
-on the repository's Releases page.
+internet (not by double-clicking `index.html`: browsers block its scripts from disk). The desktop
+app is the 2D game's Electron wrapper, a fullscreen window that serves `dist/` from its own
+`app://game` address, because the game loads its models, sounds and skies with `fetch`. Mac and
+Windows builds come from GitHub Actions, never from a developer machine, and are published on the
+repository's Releases page with install notes from `docs/RELEASE-NOTES.md`.
 
 ---
 
@@ -662,10 +664,13 @@ it facing the goal and the team-mate's pass arrives, as before.
 
 ### 22. `feature/stand-mode` — kiosk and downloads
 
-Fullscreen on Start, no right-click, pixel-ratio cap, offline check. Copy `electron/main.cjs` and
-`release.yml` from the 2D repo so GitHub Actions builds the Mac and Windows apps and publishes them
-on the Releases page.
+Copy `electron/main.cjs` and `release.yml` from the 2D repo so GitHub Actions builds the Mac and
+Windows apps and publishes them on the Releases page. The app window is fullscreen from launch and
+has no right-click menu, so the game itself needs no kiosk code; the pixel-ratio cap is the quality
+levels' (item 20). Unlike the 2D game, `dist/` is served from an `app://game` address (see §13). The
+Mac build is one universal `.dmg` (Apple chip and Intel), ad-hoc signed so that macOS offers "Open
+Anyway" instead of calling an unsigned download damaged.
 
-- [ ] Start enters fullscreen and a full run works with no internet
+- [x] The app opens fullscreen and plays with no internet
 - [ ] A tagged build publishes downloadable Mac and Windows files
 

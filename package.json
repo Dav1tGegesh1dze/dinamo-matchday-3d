@@ -4,15 +4,65 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Dinamo Tbilisi stand game in 3D: dressing room, quiz, goal",
+  "author": "Dinamo Matchday",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "package": "vite build && electron-builder"
   },
   "dependencies": {
     "three": "^0.186.0"
   },
   "devDependencies": {
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3",
     "vite": "^7.3.6"
+  },
+  "build": {
+    "appId": "ge.dinamotbilisi.roadtogoal3d",
+    "productName": "Dinamo Road to Goal 3D",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "electron/**"
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.games",
+      "identity": "-",
+      "hardenedRuntime": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-${version}-setup.${ext}"
+    }
   }
 }
